@@ -1,0 +1,19 @@
+logger:
+  name: invoice_app
+  level: INFO
+
+  log_dir: logs
+  file_name: system.log
+
+  handlers:
+    console:
+      enabled: true
+      level: INFO
+
+    file:
+      enabled: true
+      level: INFO
+
+  format:
+    pattern: "[%(asctime)s] [%(levelname)s] %(name)s: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
