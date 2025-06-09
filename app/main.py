@@ -18,12 +18,21 @@ def index():
 
 @app.route("/users/add", methods=["GET", "POST"])
 def add_user():
+    error = None
     if request.method == "POST":
         name = request.form["name"]
         email = request.form["email"]
+        session = SessionLocal()
+        # Duplicate email check
+        exists = session.query(User).filter_by(email=email).first()
+        if exists:
+            error = "A user with this email already exists."
+            session.close()
+            return render_template("add_user.html", error=error)
+        session.close()
         create_user(name, email)
         return redirect(url_for("index"))
-    return render_template("add_user.html")
+    return render_template("add_user.html", error=error)
 
 @app.route("/users/<int:user_id>")
 def user_detail(user_id):
@@ -34,12 +43,21 @@ def user_detail(user_id):
 @app.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
 def edit_user(user_id):
     user = get_user_by_id(user_id)
+    error = None
     if request.method == "POST":
         name = request.form["name"]
         email = request.form["email"]
+        session = SessionLocal()
+        # Duplicate email check (ignore self)
+        exists = session.query(User).filter(User.email==email, User.id!=user_id).first()
+        if exists:
+            error = "A user with this email already exists."
+            session.close()
+            return render_template("edit_user.html", user=user, error=error)
+        session.close()
         update_user(user_id, name, email)
         return redirect(url_for("user_detail", user_id=user_id))
-    return render_template("edit_user.html", user=user)
+    return render_template("edit_user.html", user=user, error=error)
 
 @app.route("/users/<int:user_id>/delete", methods=["POST"])
 def delete_user_route(user_id):
