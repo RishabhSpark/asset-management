@@ -38,6 +38,24 @@ class LaptopItem(Base):
     laptop_price = Column(Float)
     quantity = Column(Integer)
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    # Relationship to assignments
+    assignments = relationship("LaptopAssignment", cascade="all, delete-orphan", backref="user")
+
+class LaptopAssignment(Base):
+    __tablename__ = "laptop_assignments"
+    id = Column(Integer, primary_key=True, index=True)
+    laptop_item_id = Column(Integer, ForeignKey("laptop_items.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    assigned_at = Column(String)  # Store as ISO string for simplicity
+    unassigned_at = Column(String, nullable=True)  # New: when this assignment ended
+    # Relationship to laptop item
+    laptop_item = relationship("LaptopItem", backref="assignments")
+
 def init_db():
     if not os.path.exists("laptop_database.db"):
         Base.metadata.create_all(bind=engine)

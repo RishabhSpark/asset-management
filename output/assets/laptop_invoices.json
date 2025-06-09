@@ -7,12 +7,12 @@
     "Supplier (Vendor) Name": "CLICKTECH RETAIL PRIVATE LIMITED",
     "Laptops": [
       {
-        "Lapotop Model": "Apple MacBook Air",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -21,12 +21,12 @@
         "Quantity": 1
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -35,12 +35,12 @@
         "Quantity": 1
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -49,12 +49,12 @@
         "Quantity": 1
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -72,8 +72,8 @@
     "Supplier (Vendor) Name": "Sane Retails Private Limited",
     "Laptops": [
       {
-        "Lapotop Model": "APPLE MacBook Air Core i5 5th Gen",
-        "Processor": "i5 5th Gen",
+        "Lapotop Model": "APPLE MacBook Air",
+        "Processor": "Core i5 5th Gen",
         "RAM": "8 GB",
         "Storage": "128 GB SSD",
         "Model Color": null,

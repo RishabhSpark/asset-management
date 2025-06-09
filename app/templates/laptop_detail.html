@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laptop Details</title>
+</head>
+<body>
+    <h1>Laptop Details</h1>
+    {% if laptop %}
+        <p><b>Model:</b> {{ laptop.laptop_model }}</p>
+        <p><b>Serial Number:</b> {{ laptop.laptop_serial_number }}</p>
+        <p><b>Processor:</b> {{ laptop.processor }}</p>
+        <p><b>RAM:</b> {{ laptop.ram }}</p>
+        <p><b>Storage:</b> {{ laptop.storage }}</p>
+        <p><b>Color:</b> {{ laptop.model_color }}</p>
+        <p><b>Screen Size:</b> {{ laptop.screen_size }}</p>
+        <p><b>OS:</b> {{ laptop.laptop_os }}</p>
+        <p><b>OS Version:</b> {{ laptop.laptop_os_version }}</p>
+        <p><b>Warranty Duration:</b> {{ laptop.warranty_duration }}</p>
+        <p><b>Price:</b> {{ laptop.laptop_price }}</p>
+        <p><b>Quantity:</b> {{ laptop.quantity }}</p>
+        <h2>Assignment History</h2>
+        <ul>
+            {% for assignment in assignments %}
+                <li>
+                    Assigned to User ID: {{ assignment.user_id }}
+                    {% if assignment.user %} ({{ assignment.user.name }} - {{ assignment.user.email }}){% endif %}
+                    at {{ assignment.assigned_at }}
+                </li>
+            {% else %}
+                <li>No assignments found.</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Laptop not found.</p>
+    {% endif %}
+    <a href="{{ url_for('list_laptops') }}">Back to Laptops</a>
+</body>
+</html>

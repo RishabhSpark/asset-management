@@ -1,5 +1,7 @@
-from db.database import SessionLocal, LaptopInvoice, LaptopItem
-from typing import Dict, Any
+from db.database import SessionLocal, LaptopInvoice, LaptopItem, User, LaptopAssignment
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
     session = SessionLocal()
@@ -86,3 +88,92 @@ def get_laptop_invoice(invoice_number: str):
         }
     finally:
         session.close()
+
+def create_user(name: str, email: str) -> User:
+    session = SessionLocal()
+    user = User(name=name, email=email)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    session.close()
+    return user
+
+def get_user_by_email(email: str) -> Optional[User]:
+    session = SessionLocal()
+    user = session.query(User).filter_by(email=email).first()
+    session.close()
+    return user
+
+def get_user_by_id(user_id: int) -> Optional[User]:
+    session = SessionLocal()
+    user = session.query(User).filter_by(id=user_id).first()
+    session.close()
+    return user
+
+def get_all_users() -> List[User]:
+    session = SessionLocal()
+    users = session.query(User).all()
+    session.close()
+    return users
+
+def update_user(user_id: int, name: Optional[str] = None, email: Optional[str] = None) -> Optional[User]:
+    session = SessionLocal()
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user:
+        session.close()
+        return None
+    if name:
+        user.name = name
+    if email:
+        user.email = email
+    session.commit()
+    session.refresh(user)
+    session.close()
+    return user
+
+def delete_user(user_id: int) -> bool:
+    session = SessionLocal()
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user:
+        session.close()
+        return False
+    session.delete(user)
+    session.commit()
+    session.close()
+    return True
+
+def assign_laptop_to_user(laptop_item_id: int, user_id: int, assigned_at: Optional[str] = None) -> LaptopAssignment:
+    session = SessionLocal()
+    if assigned_at is None:
+        assigned_at = datetime.now().isoformat()
+    assignment = LaptopAssignment(laptop_item_id=laptop_item_id, user_id=user_id, assigned_at=assigned_at)
+    session.add(assignment)
+    session.commit()
+    session.refresh(assignment)
+    session.close()
+    return assignment
+
+def get_assignments_for_user(user_id: int) -> List[LaptopAssignment]:
+    session = SessionLocal()
+    assignments = session.query(LaptopAssignment)\
+        .options(joinedload(LaptopAssignment.laptop_item))\
+        .filter_by(user_id=user_id).all()
+    session.close()
+    return assignments
+
+def get_assignments_for_laptop(laptop_item_id: int) -> List[LaptopAssignment]:
+    session = SessionLocal()
+    assignments = session.query(LaptopAssignment).filter_by(laptop_item_id=laptop_item_id).all()
+    session.close()
+    return assignments
+
+def unassign_laptop(assignment_id: int) -> bool:
+    session = SessionLocal()
+    assignment = session.query(LaptopAssignment).filter_by(id=assignment_id).first()
+    if not assignment:
+        session.close()
+        return False
+    session.delete(assignment)
+    session.commit()
+    session.close()
+    return True
