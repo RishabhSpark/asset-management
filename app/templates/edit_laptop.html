@@ -17,7 +17,6 @@
         Serial Number: <input type="text" name="laptop_serial_number" value="{{ laptop.laptop_serial_number }}"><br>
         Warranty Duration (months): <input type="number" name="warranty_duration" value="{{ laptop.warranty_duration }}"><br>
         Price: <input type="number" step="0.01" name="laptop_price" value="{{ laptop.laptop_price }}"><br>
-        Quantity: <input type="number" name="quantity" value="{{ laptop.quantity }}"><br>
         <input type="submit" value="Update Laptop">
     </form>
     <a href="{{ url_for('list_laptops') }}">Back to Laptops</a>

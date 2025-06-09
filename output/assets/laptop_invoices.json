@@ -7,12 +7,12 @@
     "Supplier (Vendor) Name": "CLICKTECH RETAIL PRIVATE LIMITED",
     "Laptops": [
       {
-        "Lapotop Model": "Apple MacBook Air",
-        "Processor": "M1 chip",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",
+        "Processor": "M1",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -20,12 +20,12 @@
         "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
-        "Processor": "M1 chip",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",
+        "Processor": "M1",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -33,12 +33,12 @@
         "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
-        "Processor": "M1 chip",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",
+        "Processor": "M1",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -46,12 +46,12 @@
         "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air",
-        "Processor": "M1 chip",
+        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",
+        "Processor": "M1",
         "RAM": "8GB",
         "Storage": "256GB SSD",
         "Model Color": "Space Grey",
-        "Screen Size": "13.3-inch/33.74 cm",
+        "Screen Size": "13.3-inch",
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
@@ -61,14 +61,14 @@
     ]
   },
   {
-    "Invoice Number": "FAAOZK2200001887",
+    "Invoice Number": " FAAOZK2200001887",
     "Order Date": "02-04-2021",
     "Invoice Date": "04-04-2021",
     "Order Number": "OD121420552428604000",
     "Supplier (Vendor) Name": "Sane Retails Private Limited",
     "Laptops": [
       {
-        "Lapotop Model": "APPLE MacBook Air Core i5 5th Gen",
+        "Lapotop Model": "APPLE MacBook Air Core i5 5th Gen - (8 GB/128 GB SSD/Mac OS Sierra) MQD32HN/A",
         "Processor": "i5 5th Gen",
         "RAM": "8 GB",
         "Storage": "128 GB SSD",

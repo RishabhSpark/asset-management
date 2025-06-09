@@ -69,18 +69,6 @@ class MaintenanceLog(Base):
     performed_by = Column(String)
     laptop_item = relationship("LaptopItem", backref="maintenance_logs")
 
-class AuditLog(Base):
-    __tablename__ = "audit_logs"
-    id = Column(Integer, primary_key=True, index=True)
-    action = Column(String, nullable=False)  # e.g., 'create', 'edit', 'delete', 'assign', 'unassign', 'retire', etc.
-    entity_type = Column(String, nullable=False)  # e.g., 'User', 'LaptopItem', 'Assignment'
-    entity_id = Column(Integer, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Who performed the action
-    timestamp = Column(String, nullable=False)
-    details = Column(String, nullable=True)
-
-    user = relationship("User", backref="audit_logs")
-
 def init_db():
     if not os.path.exists("laptop_database.db"):
         Base.metadata.create_all(bind=engine)

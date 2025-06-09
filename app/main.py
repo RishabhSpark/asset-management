@@ -62,8 +62,6 @@ def edit_user(user_id):
 @app.route("/users/<int:user_id>/delete", methods=["POST"])
 def delete_user_route(user_id):
     success = soft_delete_user(user_id)
-    if success:
-        log_audit("soft_delete", "User", user_id)
     return redirect(url_for("index"))
 
 @app.route("/laptops")
@@ -145,6 +143,9 @@ def add_laptop():
             error = "A laptop with this serial number already exists."
             session.close()
             return render_template("add_laptop.html", error=error)
+        # Warranty duration: ensure integer or None
+        warranty_raw = get_field("warranty_duration")
+        warranty_duration = int(warranty_raw) if warranty_raw is not None else None
         laptop = LaptopItem(
             laptop_model=model,
             processor=get_field("processor"),
@@ -155,7 +156,7 @@ def add_laptop():
             laptop_os=get_field("laptop_os"),
             laptop_os_version=get_field("laptop_os_version"),
             laptop_serial_number=serial,
-            warranty_duration=get_field("warranty_duration"),
+            warranty_duration=warranty_duration,
             laptop_price=get_field("laptop_price"),
             invoice_id=None,  # Or set to a valid invoice if needed
             created_at=datetime.now().isoformat()
@@ -190,6 +191,9 @@ def edit_laptop(laptop_id):
             error = "A laptop with this serial number already exists."
             session.close()
             return render_template("edit_laptop.html", laptop=laptop, error=error)
+        # Warranty duration: ensure integer or None
+        warranty_raw = get_field("warranty_duration")
+        warranty_duration = int(warranty_raw) if warranty_raw is not None else None
         laptop.laptop_model = model
         laptop.processor = get_field("processor")
         laptop.ram = get_field("ram")
@@ -199,7 +203,7 @@ def edit_laptop(laptop_id):
         laptop.laptop_os = get_field("laptop_os")
         laptop.laptop_os_version = get_field("laptop_os_version")
         laptop.laptop_serial_number = serial
-        laptop.warranty_duration = get_field("warranty_duration")
+        laptop.warranty_duration = warranty_duration
         laptop.laptop_price = get_field("laptop_price")
         session.commit()
         session.close()
@@ -363,9 +367,9 @@ def download_asset_records():
             'Laptop ID': laptop.id,
             'Model': laptop.laptop_model,
             'Serial Number': laptop.laptop_serial_number,
-            'Status': getattr(laptop, 'status', 'Active'),
+            'Status': 'Retired/Disposed' if laptop.is_retired else 'Active',
             'Is Retired': laptop.is_retired,
-            'Assigned': 'Yes' if assigned_to else 'No',
+            'Assigned': True if assigned_to else False,
             'Assigned To': assigned_to or '',
             'Assigned To Email': assigned_to_email or '',
             'Created At': laptop.created_at,

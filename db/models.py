@@ -21,7 +21,6 @@ laptop_invoices = Table(
     Column('laptop_serial_number', String),
     Column('warranty_duration', Integer),
     Column('laptop_price', Float),
-    Column('quantity', Integer),
 )
 
 laptop_items = Table(
@@ -39,5 +38,4 @@ laptop_items = Table(
     Column('laptop_serial_number', String),
     Column('warranty_duration', Integer),
     Column('laptop_price', Float),
-    Column('quantity', Integer),
 )
