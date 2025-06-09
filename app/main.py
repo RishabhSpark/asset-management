@@ -62,7 +62,9 @@ def list_laptops():
 def assign_laptop():
     session = SessionLocal()
     users = session.query(User).all()
-    laptops = session.query(LaptopItem).all()
+    # Only show laptops that are not assigned and not retired
+    assigned_ids = set([a.laptop_item_id for a in session.query(LaptopAssignment).filter_by(unassigned_at=None).all()])
+    laptops = session.query(LaptopItem).filter(~LaptopItem.id.in_(assigned_ids), LaptopItem.is_retired == False).all()
     session.close()
     error = None
     if request.method == "POST":
@@ -249,6 +251,37 @@ def add_maintenance_log(laptop_id):
         return redirect(url_for("laptop_detail", laptop_id=laptop_id))
     session.close()
     return render_template("add_maintenance.html", laptop=laptop, error=error)
+
+@app.route("/replace_device/<int:assignment_id>", methods=["GET", "POST"])
+def replace_device(assignment_id):
+    session = SessionLocal()
+    assignment = session.query(LaptopAssignment).filter_by(id=assignment_id).first()
+    if not assignment or assignment.unassigned_at:
+        session.close()
+        return redirect(url_for("user_detail", user_id=assignment.user_id if assignment else 1))
+    user_id = assignment.user_id
+    old_laptop_id = assignment.laptop_item_id
+    # Get all unassigned and not retired laptops
+    assigned_ids = set([a.laptop_item_id for a in session.query(LaptopAssignment).filter_by(unassigned_at=None).all()])
+    unassigned_laptops = session.query(LaptopItem).filter(~LaptopItem.id.in_(assigned_ids), LaptopItem.is_retired == False).all()
+    error = None
+    if request.method == "POST":
+        new_laptop_id = int(request.form["new_laptop_id"])
+        # Unassign the old device
+        assignment.unassigned_at = datetime.now().isoformat()
+        # Assign the new device
+        new_assignment = LaptopAssignment(
+            laptop_item_id=new_laptop_id,
+            user_id=user_id,
+            assigned_at=datetime.now().isoformat(),
+            unassigned_at=None
+        )
+        session.add(new_assignment)
+        session.commit()
+        session.close()
+        return redirect(url_for("user_detail", user_id=user_id))
+    session.close()
+    return render_template("replace_device.html", assignment=assignment, unassigned_laptops=unassigned_laptops, error=error)
 
 if __name__ == "__main__":
     app.run(debug=True)

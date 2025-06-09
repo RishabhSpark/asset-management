@@ -20,6 +20,11 @@
                 <form method="post" action="{{ url_for('unassign_laptop_route', assignment_id=assignment.id) }}" style="display:inline;">
                     <input type="submit" value="Unassign">
                 </form>
+                {% if not assignment.unassigned_at %}
+                <form method="get" action="{{ url_for('replace_device', assignment_id=assignment.id) }}" style="display:inline;">
+                    <input type="submit" value="Replace Device">
+                </form>
+                {% endif %}
             </li>
         {% else %}
             <li>No laptops assigned.</li>
