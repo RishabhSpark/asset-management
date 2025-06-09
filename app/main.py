@@ -133,35 +133,47 @@ def add_laptop():
         # Required fields validation
         model = get_field("laptop_model")
         serial = get_field("laptop_serial_number")
-        if not model or not serial:
-            error = "Model and Serial Number are required."
+        quantity_raw = get_field("quantity")
+        try:
+            quantity = int(quantity_raw) if quantity_raw else 1
+        except ValueError:
+            quantity = 1
+        if not model:
+            error = "Model is required."
             session.close()
             return render_template("add_laptop.html", error=error)
-        # Unique serial number validation
-        exists = session.query(LaptopItem).filter_by(laptop_serial_number=serial).first()
-        if exists:
-            error = "A laptop with this serial number already exists."
-            session.close()
-            return render_template("add_laptop.html", error=error)
+        # Unique serial number validation (if provided and quantity==1)
+        if serial and quantity == 1:
+            exists = session.query(LaptopItem).filter_by(laptop_serial_number=serial).first()
+            if exists:
+                error = "A laptop with this serial number already exists."
+                session.close()
+                return render_template("add_laptop.html", error=error)
         # Warranty duration: ensure integer or None
         warranty_raw = get_field("warranty_duration")
         warranty_duration = int(warranty_raw) if warranty_raw is not None else None
-        laptop = LaptopItem(
-            laptop_model=model,
-            processor=get_field("processor"),
-            ram=get_field("ram"),
-            storage=get_field("storage"),
-            model_color=get_field("model_color"),
-            screen_size=get_field("screen_size"),
-            laptop_os=get_field("laptop_os"),
-            laptop_os_version=get_field("laptop_os_version"),
-            laptop_serial_number=serial,
-            warranty_duration=warranty_duration,
-            laptop_price=get_field("laptop_price"),
-            invoice_id=None,  # Or set to a valid invoice if needed
-            created_at=datetime.now().isoformat()
-        )
-        session.add(laptop)
+        # Add laptops
+        for i in range(quantity):
+            serial_number = serial if (serial and quantity == 1) else None
+            # If quantity > 1 and serial is provided, only assign to first, rest are None
+            if serial and quantity > 1 and i > 0:
+                serial_number = None
+            laptop = LaptopItem(
+                laptop_model=model,
+                processor=get_field("processor"),
+                ram=get_field("ram"),
+                storage=get_field("storage"),
+                model_color=get_field("model_color"),
+                screen_size=get_field("screen_size"),
+                laptop_os=get_field("laptop_os"),
+                laptop_os_version=get_field("laptop_os_version"),
+                laptop_serial_number=serial_number,
+                warranty_duration=warranty_duration,
+                laptop_price=get_field("laptop_price"),
+                invoice_id=None,  # Manually added
+                created_at=datetime.now().isoformat()
+            )
+            session.add(laptop)
         session.commit()
         session.close()
         return redirect(url_for("list_laptops"))
@@ -309,30 +321,32 @@ def download_invoices():
     session = SessionLocal()
     invoices = session.query(LaptopInvoice).all()
     data = []
-    for invoice in invoices:
-        for item in invoice.items:
-            row = {
-                'Invoice Number': invoice.invoice_number,
-                'Order Date': invoice.order_date,
-                'Invoice Date': invoice.invoice_date,
-                'Order Number': invoice.order_number,
-                'Supplier Name': invoice.supplier_name,
-                'Laptop Model': item.laptop_model,
-                'Processor': item.processor,
-                'RAM': item.ram,
-                'Storage': item.storage,
-                'Color': item.model_color,
-                'Screen Size': item.screen_size,
-                'OS': item.laptop_os,
-                'OS Version': item.laptop_os_version,
-                'Serial Number': item.laptop_serial_number,
-                'Warranty Duration': item.warranty_duration,
-                'Price': item.laptop_price,
-                'Created At': item.created_at,
-                'Warranty Expiry': item.warranty_expiry,
-                'Is Retired': item.is_retired
-            }
-            data.append(row)
+    # Add all laptops, including those not linked to an invoice
+    all_laptops = session.query(LaptopItem).all()
+    for item in all_laptops:
+        invoice = item.invoice if item.invoice_id else None
+        row = {
+            'Invoice Number': invoice.invoice_number if invoice else '',
+            'Order Date': invoice.order_date if invoice else '',
+            'Invoice Date': invoice.invoice_date if invoice else '',
+            'Order Number': invoice.order_number if invoice else '',
+            'Supplier Name': invoice.supplier_name if invoice else '',
+            'Laptop Model': item.laptop_model,
+            'Processor': item.processor,
+            'RAM': item.ram,
+            'Storage': item.storage,
+            'Color': item.model_color,
+            'Screen Size': item.screen_size,
+            'OS': item.laptop_os,
+            'OS Version': item.laptop_os_version,
+            'Serial Number': item.laptop_serial_number,
+            'Warranty Duration': item.warranty_duration,
+            'Price': item.laptop_price,
+            'Created At': item.created_at,
+            'Warranty Expiry': item.warranty_expiry,
+            'Is Retired': item.is_retired
+        }
+        data.append(row)
     session.close()
     import os
     import pandas as pd
