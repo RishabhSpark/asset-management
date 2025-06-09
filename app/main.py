@@ -2,11 +2,12 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, delete_user, assign_laptop_to_user, get_assignments_for_user, get_assignments_for_laptop, unassign_laptop
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice
 from sqlalchemy.orm import joinedload
 from datetime import datetime
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -282,6 +283,46 @@ def replace_device(assignment_id):
         return redirect(url_for("user_detail", user_id=user_id))
     session.close()
     return render_template("replace_device.html", assignment=assignment, unassigned_laptops=unassigned_laptops, error=error)
+
+@app.route("/download_invoices")
+def download_invoices():
+    session = SessionLocal()
+    invoices = session.query(LaptopInvoice).all()
+    data = []
+    for invoice in invoices:
+        for item in invoice.items:
+            row = {
+                'Invoice Number': invoice.invoice_number,
+                'Order Date': invoice.order_date,
+                'Invoice Date': invoice.invoice_date,
+                'Order Number': invoice.order_number,
+                'Supplier Name': invoice.supplier_name,
+                'Laptop Model': item.laptop_model,
+                'Processor': item.processor,
+                'RAM': item.ram,
+                'Storage': item.storage,
+                'Color': item.model_color,
+                'Screen Size': item.screen_size,
+                'OS': item.laptop_os,
+                'OS Version': item.laptop_os_version,
+                'Serial Number': item.laptop_serial_number,
+                'Warranty Duration': item.warranty_duration,
+                'Price': item.laptop_price,
+                'Created At': item.created_at,
+                'Warranty Expiry': item.warranty_expiry,
+                'Is Retired': item.is_retired
+            }
+            data.append(row)
+    session.close()
+    import os
+    import pandas as pd
+    # Ensure output/assets directory exists
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'output', 'assets')
+    os.makedirs(output_dir, exist_ok=True)
+    file_path = os.path.join(output_dir, "laptop_invoices_download.xlsx")
+    df = pd.DataFrame(data)
+    df.to_excel(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
