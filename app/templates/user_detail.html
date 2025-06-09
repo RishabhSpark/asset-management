@@ -15,7 +15,8 @@
             <li>
                 Laptop ID: {{ assignment.laptop_item_id }}
                 {% if assignment.laptop_item %} ({{ assignment.laptop_item.laptop_model }} - {{ assignment.laptop_item.laptop_serial_number }}){% endif %}
-                at {{ assignment.assigned_at }}
+                <br>Assigned at: {{ assignment.assigned_at }}
+                {% if assignment.unassigned_at %}<br>Unassigned at: {{ assignment.unassigned_at }}{% endif %}
                 <form method="post" action="{{ url_for('unassign_laptop_route', assignment_id=assignment.id) }}" style="display:inline;">
                     <input type="submit" value="Unassign">
                 </form>

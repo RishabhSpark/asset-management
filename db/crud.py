@@ -48,8 +48,7 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                 laptop_os_version=item.get("Laptop OS Version"),
                 laptop_serial_number=serials[i] if i < len(serials) else None,
                 warranty_duration=item.get("Warranty Duration"),
-                laptop_price=item.get("Laptop Price"),
-                quantity=1
+                laptop_price=item.get("Laptop Price")
             )
             session.add(laptop_item)
     session.commit()

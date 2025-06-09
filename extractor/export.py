@@ -29,7 +29,7 @@ def export_all_laptop_invoices_json(output_path="output/assets/laptop_invoices.j
                 "Laptop Serial Number": item.laptop_serial_number,
                 "Warranty Duration": item.warranty_duration,
                 "Laptop Price": item.laptop_price,
-                "Quantity": item.quantity
+                # "Quantity": item.quantity
             })
         inv_dict = {
             "Invoice Number": inv.invoice_number,

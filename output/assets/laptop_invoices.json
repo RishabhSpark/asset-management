@@ -7,7 +7,7 @@
     "Supplier (Vendor) Name": "CLICKTECH RETAIL PRIVATE LIMITED",
     "Laptops": [
       {
-        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
+        "Lapotop Model": "Apple MacBook Air",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
@@ -17,11 +17,10 @@
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
         "Warranty Duration": null,
-        "Laptop Price": 44906.78,
-        "Quantity": 1
+        "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
+        "Lapotop Model": "Apple MacBook Air",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
@@ -31,11 +30,10 @@
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
         "Warranty Duration": null,
-        "Laptop Price": 44906.78,
-        "Quantity": 1
+        "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
+        "Lapotop Model": "Apple MacBook Air",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
@@ -45,11 +43,10 @@
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
         "Warranty Duration": null,
-        "Laptop Price": 44906.78,
-        "Quantity": 1
+        "Laptop Price": 44906.78
       },
       {
-        "Lapotop Model": "Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display",
+        "Lapotop Model": "Apple MacBook Air",
         "Processor": "M1 chip",
         "RAM": "8GB",
         "Storage": "256GB SSD",
@@ -59,8 +56,7 @@
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
         "Warranty Duration": null,
-        "Laptop Price": 44906.78,
-        "Quantity": 1
+        "Laptop Price": 44906.78
       }
     ]
   },
@@ -72,8 +68,8 @@
     "Supplier (Vendor) Name": "Sane Retails Private Limited",
     "Laptops": [
       {
-        "Lapotop Model": "APPLE MacBook Air",
-        "Processor": "Core i5 5th Gen",
+        "Lapotop Model": "APPLE MacBook Air Core i5 5th Gen - (8 GB/128 GB SSD/Mac OS Sierra) MQD32HN/A",
+        "Processor": "i5 5th Gen",
         "RAM": "8 GB",
         "Storage": "128 GB SSD",
         "Model Color": null,
@@ -82,8 +78,7 @@
         "Laptop OS Version": null,
         "Laptop Serial Number": "SFVFDL811 J1WK",
         "Warranty Duration": 12,
-        "Laptop Price": 67640.0,
-        "Quantity": 1
+        "Laptop Price": 67640.0
       }
     ]
   }

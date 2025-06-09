@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 import os
@@ -33,10 +33,12 @@ class LaptopItem(Base):
     screen_size = Column(String)
     laptop_os = Column(String)
     laptop_os_version = Column(String)
-    laptop_serial_number = Column(String)
+    laptop_serial_number = Column(String, unique=True)
     warranty_duration = Column(Integer)
     laptop_price = Column(Float)
-    quantity = Column(Integer)
+    created_at = Column(String, default=None)
+    warranty_expiry = Column(String, nullable=True)  # New: warranty expiry date
+    is_retired = Column(Boolean, default=False)      # New: retired/disposed status
 
 class User(Base):
     __tablename__ = "users"
@@ -55,6 +57,15 @@ class LaptopAssignment(Base):
     unassigned_at = Column(String, nullable=True)  # New: when this assignment ended
     # Relationship to laptop item
     laptop_item = relationship("LaptopItem", backref="assignments")
+
+class MaintenanceLog(Base):
+    __tablename__ = "maintenance_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    laptop_item_id = Column(Integer, ForeignKey("laptop_items.id"))
+    date = Column(String)
+    description = Column(String)
+    performed_by = Column(String)
+    laptop_item = relationship("LaptopItem", backref="maintenance_logs")
 
 def init_db():
     if not os.path.exists("laptop_database.db"):
