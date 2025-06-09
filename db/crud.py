@@ -36,6 +36,24 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
         else:
             serials = [None] * quantity
         for i in range(quantity):
+            serial = serials[i] if i < len(serials) else None
+            # Check for duplicate serial number
+            if serial:
+                existing_laptop = session.query(LaptopItem).filter_by(laptop_serial_number=serial).first()
+                if existing_laptop:
+                    # Update existing laptop fields
+                    existing_laptop.invoice_id = invoice.id
+                    existing_laptop.laptop_model = item.get("Lapotop Model")
+                    existing_laptop.processor = item.get("Processor")
+                    existing_laptop.ram = item.get("RAM")
+                    existing_laptop.storage = item.get("Storage")
+                    existing_laptop.model_color = item.get("Model Color")
+                    existing_laptop.screen_size = item.get("Screen Size")
+                    existing_laptop.laptop_os = item.get("Laptop OS")
+                    existing_laptop.laptop_os_version = item.get("Laptop OS Version")
+                    existing_laptop.warranty_duration = item.get("Warranty Duration")
+                    existing_laptop.laptop_price = item.get("Laptop Price")
+                    continue  # Don't add a new one
             laptop_item = LaptopItem(
                 invoice_id=invoice.id,
                 laptop_model=item.get("Lapotop Model"),
@@ -46,7 +64,7 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                 screen_size=item.get("Screen Size"),
                 laptop_os=item.get("Laptop OS"),
                 laptop_os_version=item.get("Laptop OS Version"),
-                laptop_serial_number=serials[i] if i < len(serials) else None,
+                laptop_serial_number=serial,
                 warranty_duration=item.get("Warranty Duration"),
                 laptop_price=item.get("Laptop Price")
             )
@@ -173,6 +191,28 @@ def unassign_laptop(assignment_id: int) -> bool:
         session.close()
         return False
     session.delete(assignment)
+    session.commit()
+    session.close()
+    return True
+
+def soft_delete_user(user_id: int) -> bool:
+    session = SessionLocal()
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user or not user.is_active:
+        session.close()
+        return False
+    user.is_active = False
+    session.commit()
+    session.close()
+    return True
+
+def soft_delete_laptop(laptop_id: int) -> bool:
+    session = SessionLocal()
+    laptop = session.query(LaptopItem).filter_by(id=laptop_id).first()
+    if not laptop or not laptop.is_active:
+        session.close()
+        return False
+    laptop.is_active = False
     session.commit()
     session.close()
     return True

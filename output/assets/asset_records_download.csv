@@ -1,0 +1,6 @@
+Laptop ID,Model,Serial Number,Status,Is Retired,Assigned,Assigned To,Assigned To Email,Created At,Warranty Expiry,Price
+1,Apple MacBook Air,,Active,True,No,,,,,44906.78
+2,Apple MacBook Air,,Active,False,No,,,,,44906.78
+3,Apple MacBook Air,,Active,False,Yes,new user,newuser@emial.com,,,44906.78
+4,Apple MacBook Air,,Active,False,Yes,fiona,fiona123r2@werf.com,,,44906.78
+5,APPLE MacBook Air Core i5 5th Gen,SFVFDL811 J1WK,Active,False,Yes,Rishabh,rishabh1000khadnelwal@gmail.com,,,67640.0

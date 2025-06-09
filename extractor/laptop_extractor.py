@@ -55,6 +55,7 @@ RULES:
 6. The details should be extracted from the provided Purchase Order text.
 7. If the Purchase Order text does not contain any of the fields, set those fields to null in the JSON object.
 8. Do not think about the context of the invoice text, just extract the fields as they are in the format mentioned.
+9. Please strip unnecessary spaces before and after the text.
 
 Return only a valid JSON object inside markdown code block, like this:
 

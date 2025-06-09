@@ -3,8 +3,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from flask import Flask, render_template, request, redirect, url_for, send_file
-from db.crud import create_user, get_all_users, get_user_by_id, update_user, delete_user, assign_laptop_to_user, get_assignments_for_user, get_assignments_for_laptop, unassign_laptop
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice
+from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 import pandas as pd
@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    users = get_all_users()
+    users = [u for u in get_all_users() if u.is_active]
     return render_template("index.html", users=users)
 
 @app.route("/users/add", methods=["GET", "POST"])
@@ -61,7 +61,9 @@ def edit_user(user_id):
 
 @app.route("/users/<int:user_id>/delete", methods=["POST"])
 def delete_user_route(user_id):
-    delete_user(user_id)
+    success = soft_delete_user(user_id)
+    if success:
+        log_audit("soft_delete", "User", user_id)
     return redirect(url_for("index"))
 
 @app.route("/laptops")
@@ -71,9 +73,9 @@ def list_laptops():
     if show_unassigned:
         # Get all laptop IDs that are currently assigned
         assigned_ids = set([a.laptop_item_id for a in session.query(LaptopAssignment).filter_by(unassigned_at=None).all()])
-        laptops = session.query(LaptopItem).filter(~LaptopItem.id.in_(assigned_ids), LaptopItem.is_retired == False).all()
+        laptops = session.query(LaptopItem).filter(~LaptopItem.id.in_(assigned_ids), LaptopItem.is_retired == False, LaptopItem.is_active == True).all()
     else:
-        laptops = session.query(LaptopItem).filter(LaptopItem.is_retired == False).all()
+        laptops = session.query(LaptopItem).filter(LaptopItem.is_retired == False, LaptopItem.is_active == True).all()
     session.close()
     return render_template("laptops.html", laptops=laptops, show_unassigned=show_unassigned)
 
@@ -111,7 +113,6 @@ def assign_laptop():
 
 @app.route("/unassign/<int:assignment_id>", methods=["POST"])
 def unassign_laptop_route(assignment_id):
-    from datetime import datetime
     session = SessionLocal()
     assignment = session.query(LaptopAssignment).filter_by(id=assignment_id).first()
     user_id = assignment.user_id if assignment else None
@@ -127,7 +128,6 @@ def unassign_laptop_route(assignment_id):
 def add_laptop():
     error = None
     if request.method == "POST":
-        from datetime import datetime
         session = SessionLocal()
         def get_field(name):
             value = request.form.get(name)
@@ -250,8 +250,6 @@ def add_maintenance_log(laptop_id):
         session.close()
         return redirect(url_for("list_laptops"))
     if request.method == "POST":
-        from db.database import MaintenanceLog
-        from datetime import datetime
         description = request.form.get("description")
         performed_by = request.form.get("performed_by")
         if not description or not performed_by:
@@ -340,6 +338,75 @@ def download_invoices():
     file_path = os.path.join(output_dir, "laptop_invoices_download.xlsx")
     df = pd.DataFrame(data)
     df.to_excel(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
+
+@app.route("/download_asset_records")
+def download_asset_records():
+    session = SessionLocal()
+    laptops = session.query(LaptopItem).all()
+    data = []
+    for laptop in laptops:
+        # Find active assignment
+        active_assignment = (
+            session.query(LaptopAssignment)
+            .filter_by(laptop_item_id=laptop.id, unassigned_at=None)
+            .first()
+        )
+        assigned_to = None
+        assigned_to_email = None
+        if active_assignment:
+            user = session.query(User).filter_by(id=active_assignment.user_id).first()
+            if user:
+                assigned_to = user.name
+                assigned_to_email = user.email
+        row = {
+            'Laptop ID': laptop.id,
+            'Model': laptop.laptop_model,
+            'Serial Number': laptop.laptop_serial_number,
+            'Status': getattr(laptop, 'status', 'Active'),
+            'Is Retired': laptop.is_retired,
+            'Assigned': 'Yes' if assigned_to else 'No',
+            'Assigned To': assigned_to or '',
+            'Assigned To Email': assigned_to_email or '',
+            'Created At': laptop.created_at,
+            'Warranty Expiry': laptop.warranty_expiry,
+            'Price': laptop.laptop_price
+        }
+        data.append(row)
+    session.close()
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'output', 'assets')
+    os.makedirs(output_dir, exist_ok=True)
+    file_path = os.path.join(output_dir, "asset_records_download.csv")
+    df = pd.DataFrame(data)
+    df.to_csv(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
+
+@app.route("/download_assignment_history")
+def download_assignment_history():
+    session = SessionLocal()
+    assignments = session.query(LaptopAssignment).all()
+    data = []
+    for assignment in assignments:
+        laptop = session.query(LaptopItem).filter_by(id=assignment.laptop_item_id).first()
+        user = session.query(User).filter_by(id=assignment.user_id).first()
+        row = {
+            'Assignment ID': assignment.id,
+            'Laptop ID': assignment.laptop_item_id,
+            'Laptop Model': laptop.laptop_model if laptop else '',
+            'Laptop Serial Number': laptop.laptop_serial_number if laptop else '',
+            'User ID': assignment.user_id,
+            'User Name': user.name if user else '',
+            'User Email': user.email if user else '',
+            'Assigned At': assignment.assigned_at,
+            'Unassigned At': assignment.unassigned_at or '',
+        }
+        data.append(row)
+    session.close()
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'output', 'assets')
+    os.makedirs(output_dir, exist_ok=True)
+    file_path = os.path.join(output_dir, "assignment_history_download.csv")
+    df = pd.DataFrame(data).sort_values(by="Laptop ID")
+    df.to_csv(file_path, index=False)
     return send_file(file_path, as_attachment=True)
 
 if __name__ == "__main__":

@@ -7,6 +7,8 @@
     <h1>All Laptops</h1>
     <a href="{{ url_for('add_laptop') }}">Add Laptop</a>
     <a href="{{ url_for('download_invoices') }}">Download All Invoices (Excel)</a>
+    <a href="{{ url_for('download_asset_records') }}">Download All Asset Records (CSV)</a>
+    <a href="{{ url_for('download_assignment_history') }}">Download Assignment History (CSV)</a>
     <form method="get" action="{{ url_for('list_laptops') }}" style="margin-top:10px;">
         <label><input type="checkbox" name="unassigned" value="1" {% if show_unassigned %}checked{% endif %} onchange="this.form.submit()"> Show only unassigned laptops</label>
     </form>

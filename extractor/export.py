@@ -52,7 +52,7 @@ def export_all_laptop_invoices_csv(output_path="output/assets/laptop_invoices.cs
     logger.info("Exporting all laptop items to CSV.")
     df = pd.read_sql("""
         SELECT i.invoice_number, i.order_date, i.invoice_date, i.order_number, i.supplier_name,
-               l.laptop_model, l.processor, l.ram, l.storage, l.model_color, l.screen_size, l.laptop_os, l.laptop_os_version, l.laptop_serial_number, l.warranty_duration, l.laptop_price, l.quantity
+               l.laptop_model, l.processor, l.ram, l.storage, l.model_color, l.screen_size, l.laptop_os, l.laptop_os_version, l.laptop_serial_number, l.warranty_duration, l.laptop_price
         FROM laptop_invoices i
         JOIN laptop_items l ON i.id = l.invoice_id
     """, engine)
