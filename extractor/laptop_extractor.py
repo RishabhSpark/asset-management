@@ -33,17 +33,18 @@ def extract_laptop_information(invoice_text: str) -> Dict[str, Any]:
 - Supplier (Vendor) Name: a string
 
 Then, extract a list of laptops in the invoice, each with these fields:
-- Lapotop Model: a string
-- Processor: a string
-- RAM: a string
-- Storage: a string
+- Lapotop Model: a string (should not contain specifications like RAM, Storage, Screen Size, or any other features. should be just the model name)
+- Laptop Brand: a string (name of the brand, e.g., Apple, Dell, HP)
+- Processor: a string (e.g., "Intel Core i7", "AMD Ryzen 5", "M1")
+- RAM: a string   (e.g., "8GB", "16GB" [no space between number and GB])
+- Storage: a string (e.g., "256GB SSD", "512GB SSD", "1TB HDD" [no space between number and GB/TB, but a space after GB/TB and before SSD/HDD])
 - Model Color: a string
 - Screen Size: a string
 - Laptop OS: a string
 - Laptop OS Version: a string
 - Laptop Serial Number: a string
 - Warranty Duration: an integer in months
-- Laptop Price: a number (in INR), should be the price of only one laptop and not the total price
+- Laptop Price: a number (in INR), should be the price of only that one laptop and not the total price
 - Quantity: an integer representing the number of this laptop in the invoice
 
 RULES:
@@ -55,7 +56,8 @@ RULES:
 6. The details should be extracted from the provided Purchase Order text.
 7. If the Purchase Order text does not contain any of the fields, set those fields to null in the JSON object.
 8. Do not think about the context of the invoice text, just extract the fields as they are in the format mentioned.
-9. Please strip unnecessary spaces before and after the text.
+9. Please strip unnecessary spaces before and after (or even between text).
+10. Columns like "laptop_model", "laptop_brand", "model_color" should be in propercase (e.g., "MacBook Pro", "Dell XPS 13", "HP Spectre x360"). Do not use all caps or all lowercase.
 
 Return only a valid JSON object inside markdown code block, like this:
 
