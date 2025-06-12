@@ -1,16 +1,6 @@
 Laptop ID,Model,Serial Number,Status,Is Retired,Assigned,Assigned To,Assigned To Email,Created At,Warranty Expiry,Price
-1,Apple MacBook Air Laptop M1 chip,None,Active,False,True,Fiona Lazarus,fiona@gmail.com,,,44906.78
-2,Apple MacBook Air Laptop M1 chip,,Active,False,True,Fiona Lazarus,fiona@gmail.com,,,44906.78
-3,Apple MacBook Air Laptop M1 chip,,Active,False,True,Fiona Lazarus,fiona@gmail.com,,,44906.78
-4,Apple MacBook Air Laptop M1 chip,,Active,False,True,Fiona Lazarus,fiona@gmail.com,,,44906.78
-5,APPLE MacBook Air Core i5 5th Gen,SFVFDL811,Active,False,True,Anurag,anurag@gmail.com,,,67640.0
-6,papil,,Retired/Disposed,True,False,,,2025-06-11T09:54:39.157230,,51732.0
-7,papil,,Retired/Disposed,True,False,,,2025-06-11T09:54:39.157996,,51732.0
-8,papil,,Active,False,False,,,2025-06-11T09:54:39.158360,,51732.0
-9,papil,,Active,False,False,,,2025-06-11T09:54:39.158635,,51732.0
-10,papil,,Active,False,False,,,2025-06-11T09:54:39.158847,,51732.0
-11,papil,,Active,False,False,,,2025-06-11T09:54:39.159038,,51732.0
-12,papil,,Active,False,False,,,2025-06-11T09:54:39.159221,,51732.0
-13,papil,,Active,False,False,,,2025-06-11T09:54:39.159435,,51732.0
-14,papil,,Active,False,False,,,2025-06-11T09:54:39.159615,,51732.0
-15,papil,,Retired/Disposed,True,False,,,2025-06-11T09:54:39.159791,,51732.0
+1,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,Active,False,True,Vijay,vijay@gmail.com,,,44906.78
+2,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,Active,False,True,fiona,fiona123r2@werf.com,,,44906.78
+3,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,Active,False,True,Vijay,vijay@gmail.com,,,44906.78
+4,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,Active,False,True,Vijay,vijay@gmail.com,,,44906.78
+5,APPLE MacBook Air Core i5 5th Gen - (8 GB/128 GB SSD/Mac OS Sierra) MQD32HN/A,SFVFDL811 J1WK,Active,False,False,,,,,67640.0
