@@ -1,98 +1,36 @@
-import os
-import pandas as pd
-from datetime import datetime
-from dotenv import load_dotenv
-from functools import wraps
-from sqlalchemy.orm import joinedload
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-from flask import Flask, render_template, request, redirect, url_for, send_file, session,flash, g
-from werkzeug.security import generate_password_hash, check_password_hash
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
+from googleapiclient.http import MediaIoBaseDownload
+from flask import Flask, render_template, request, redirect, url_for, send_file, session, jsonify
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
+import pandas as pd
+from datetime import datetime
+from sqlalchemy.orm import joinedload
 
-
-
-load_dotenv()
+# import sys
+import os
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'supersecret123') 
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.secret_key = "supersecret123"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 CLIENT_SECRETS_FILE = 'client_secret.json'
-
-USERS = {}
-for i in range(1, 10): 
-    username = os.getenv(f'USER_{i}_NAME')
-    password = os.getenv(f'USER_{i}_PASSWORD')
-    if username and password:
-        USERS[username] = password  
 
 
 def build_credentials(creds_dict):
     return Credentials(**creds_dict)
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session or not session['logged_in']:
-            flash('Please log in to access this page.', 'danger')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-@app.before_request
-def load_logged_in_user():
-    g.user = None
-    if 'username' in session:
-        g.user = session['username']
-
-
 @app.route("/")
 def index():
-    return render_template("login.html")
 
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-
-    if "logged_in" in session and session['logged_in']:
-        return render_template('index.html')
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username in USERS and check_password_hash(USERS[username], password):
-            session['logged_in'] = True
-            session['username'] = username
-            flash(f'Logged in successfully as {username}!', 'success')
-
-            return render_template('index.html')
-        else:
-            flash('Invalid username or password.', 'danger')
-            return render_template('login.html')
-    return render_template('login.html')
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    session.pop('credentials', None)
-    flash('You have been logged out.', 'info')
-    session.clear()
-    return redirect(url_for('login'))
+    return render_template("index.html")
 
 
 @app.route('/authorize')
-@login_required
 def authorize():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
@@ -104,7 +42,6 @@ def authorize():
 
 
 @app.route('/oauth2callback')
-@login_required
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
@@ -119,15 +56,14 @@ def oauth2callback():
 
 
 @app.route('/users')
-@login_required
 def users():
-
+    if 'credentials' not in session:
+        return redirect('authorize')
     users = [u for u in get_all_users() if u.is_active]
     return render_template("users.html", users=users)
 
 
 @app.route("/users/add", methods=["GET", "POST"])
-@login_required
 def add_user():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -149,7 +85,6 @@ def add_user():
 
 
 @app.route("/users/<int:user_id>")
-@login_required
 def user_detail(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -159,7 +94,6 @@ def user_detail(user_id):
 
 
 @app.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
-@login_required
 def edit_user(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -183,7 +117,6 @@ def edit_user(user_id):
 
 
 @app.route("/users/<int:user_id>/delete", methods=["POST"])
-@login_required
 def delete_user_route(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -192,7 +125,6 @@ def delete_user_route(user_id):
 
 
 @app.route("/laptops")
-@login_required
 def list_laptops():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -212,7 +144,6 @@ def list_laptops():
 
 
 @app.route("/assign", methods=["GET", "POST"])
-@login_required
 def assign_laptop():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -251,7 +182,6 @@ def assign_laptop():
 
 
 @app.route("/unassign/<int:assignment_id>", methods=["POST"])
-@login_required
 def unassign_laptop_route(assignment_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -269,7 +199,6 @@ def unassign_laptop_route(assignment_id):
 
 
 @app.route("/laptops/add", methods=["GET", "POST"])
-@login_required
 def add_laptop():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -333,7 +262,6 @@ def add_laptop():
 
 
 @app.route("/laptops/<int:laptop_id>/edit", methods=["GET", "POST"])
-@login_required
 def edit_laptop(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -383,7 +311,6 @@ def edit_laptop(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>")
-@login_required
 def laptop_detail(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -399,7 +326,6 @@ def laptop_detail(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>/retire", methods=["POST"])
-@login_required
 def retire_laptop(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -431,7 +357,6 @@ def retire_laptop(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>/maintenance", methods=["GET", "POST"])
-@login_required
 def add_maintenance_log(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -463,7 +388,6 @@ def add_maintenance_log(laptop_id):
 
 
 @app.route("/replace_device/<int:assignment_id>", methods=["GET", "POST"])
-@login_required
 def replace_device(assignment_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -501,7 +425,6 @@ def replace_device(assignment_id):
 
 
 @app.route("/download_invoices")
-@login_required
 def download_invoices():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -547,7 +470,6 @@ def download_invoices():
 
 
 @app.route("/download_asset_records")
-@login_required
 def download_asset_records():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -594,7 +516,6 @@ def download_asset_records():
 
 
 @app.route("/download_assignment_history")
-@login_required
 def download_assignment_history():
     if 'credentials' not in session:
         return redirect('authorize')

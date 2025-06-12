@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Replace Device</title>
+</head>
+<body>
+    <h1>Replace Device for User ID: {{ assignment.user_id }}</h1>
+    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+    <form method="post">
+        <label for="new_laptop_id">Replace with:</label>
+        <select name="new_laptop_id" id="new_laptop_id" required>
+            {% for laptop in unassigned_laptops %}
+                <option value="{{ laptop.id }}">ID: {{ laptop.id }} | Model: {{ laptop.laptop_model }} | Serial: {{ laptop.laptop_serial_number }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Replace">
+    </form>
+    <a href="{{ url_for('user_detail', user_id=assignment.user_id) }}">Cancel</a>
+</body>
+</html>

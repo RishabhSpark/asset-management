@@ -1,36 +1,35 @@
-import os
-import pandas as pd
-from datetime import datetime
-from dotenv import load_dotenv
-from functools import wraps
-from sqlalchemy.orm import joinedload
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-from flask import Flask, render_template, request, redirect, url_for, send_file, session,flash, g
-from werkzeug.security import generate_password_hash, check_password_hash
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
+from googleapiclient.http import MediaIoBaseDownload
+from flask import Flask, render_template, request, redirect, url_for, send_file, session, jsonify, flash, g
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
+import pandas as pd
+from functools import wraps
+from datetime import datetime
+from sqlalchemy.orm import joinedload
+from werkzeug.security import generate_password_hash, check_password_hash
 
-
-
-load_dotenv()
+# import sys
+import os
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'supersecret123') 
+app.secret_key = "supersecret123"
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 CLIENT_SECRETS_FILE = 'client_secret.json'
-
-USERS = {}
-for i in range(1, 10): 
-    username = os.getenv(f'USER_{i}_NAME')
-    password = os.getenv(f'USER_{i}_PASSWORD')
-    if username and password:
-        USERS[username] = password  
+print(generate_password_hash("password123"))
+print(generate_password_hash("securepass"))
+USERS = {
+    "admin": "scrypt:32768:8:1$yDEgWT5dfV7XJjBa$d8fe75d5d989b9354d62328159a7faf0600293cb23338331baec423b39eb22181364673836739d47237d8690f8292f9cf178b35ea981a919ddca31b8fe244665",
+    "fiona.l": "securepass",
+    "rishabh": "securepass"
+}
 
 
 def build_credentials(creds_dict):

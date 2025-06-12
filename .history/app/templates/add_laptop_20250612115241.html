@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Laptop</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#"></a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="btn btn-outline-light ms-2"
+                href="{{ url_for('logout') }}"
+                aria-current="page"
+              >
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4 mb-0">Add New Laptop</h1>
+        <a
+          href="{{ url_for('list_laptops') }}"
+          class="btn btn-outline-secondary"
+        >
+          <i class="bi bi-arrow-left"></i> Back to Laptops
+        </a>
+      </div>
+
+      <div class="card shadow-sm p-4">
+        <form method="post">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="laptopModel" class="form-label">Model:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="laptopModel"
+                  name="laptop_model"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="processor" class="form-label">Processor:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="processor"
+                  name="processor"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="ram" class="form-label">RAM:</label>
+                <input type="text" class="form-control" id="ram" name="ram" />
+              </div>
+              <div class="mb-3">
+                <label for="storage" class="form-label">Storage:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="storage"
+                  name="storage"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="modelColor" class="form-label">Color:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="modelColor"
+                  name="model_color"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="screenSize" class="form-label">Screen Size:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="screenSize"
+                  name="screen_size"
+                />
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="laptopOS" class="form-label">OS:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="laptopOS"
+                  name="laptop_os"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="osVersion" class="form-label">OS Version:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="osVersion"
+                  name="laptop_os_version"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="laptopSerialNumber" class="form-label"
+                  >Serial Number:</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="laptopSerialNumber"
+                  name="laptop_serial_number"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="warrantyDuration" class="form-label"
+                  >Warranty Duration (months):</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="warrantyDuration"
+                  name="warranty_duration"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="laptopPrice" class="form-label">Price:</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  id="laptopPrice"
+                  name="laptop_price"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity:</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="quantity"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                />
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg mt-3 w-100">
+            <i class="bi bi-plus-circle me-2"></i>Add Laptop
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

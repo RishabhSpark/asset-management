@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Details</title>
+</head>
+<body>
+    <h1>{{ user.name }} ({{ user.email }})</h1>
+    <a href="{{ url_for('edit_user', user_id=user.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('delete_user_route', user_id=user.id) }}" style="display:inline;">
+        <input type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+    </form>
+    <h2>Assignment History</h2>
+    <ul>
+        {% for assignment in assignments %}
+            <li>
+                Laptop ID: {{ assignment.laptop_item_id }}
+                {% if assignment.laptop_item %} ({{ assignment.laptop_item.laptop_model }} - {{ assignment.laptop_item.laptop_serial_number }}){% endif %}
+                <br>Assigned at: {{ assignment.assigned_at }}
+                {% if assignment.unassigned_at %}<br>Unassigned at: {{ assignment.unassigned_at }}{% endif %}
+                <form method="post" action="{{ url_for('unassign_laptop_route', assignment_id=assignment.id) }}" style="display:inline;">
+                    <input type="submit" value="Unassign">
+                </form>
+                {% if not assignment.unassigned_at %}
+                <form method="get" action="{{ url_for('replace_device', assignment_id=assignment.id) }}" style="display:inline;">
+                    <input type="submit" value="Replace Device">
+                </form>
+                {% endif %}
+            </li>
+        {% else %}
+            <li>No laptops assigned.</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('assign_laptop') }}">Assign Laptop</a> |
+    <a href="{{ url_for('index') }}">Back to Users</a>
+</body>
+</html>

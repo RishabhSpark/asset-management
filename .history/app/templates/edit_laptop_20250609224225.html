@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Laptop</title>
+</head>
+<body>
+    <h1>Edit Laptop</h1>
+    <form method="post">
+        Model: <input type="text" name="laptop_model" value="{{ laptop.laptop_model }}" required><br>
+        Processor: <input type="text" name="processor" value="{{ laptop.processor }}"><br>
+        RAM: <input type="text" name="ram" value="{{ laptop.ram }}"><br>
+        Storage: <input type="text" name="storage" value="{{ laptop.storage }}"><br>
+        Color: <input type="text" name="model_color" value="{{ laptop.model_color }}"><br>
+        Screen Size: <input type="text" name="screen_size" value="{{ laptop.screen_size }}"><br>
+        OS: <input type="text" name="laptop_os" value="{{ laptop.laptop_os }}"><br>
+        OS Version: <input type="text" name="laptop_os_version" value="{{ laptop.laptop_os_version }}"><br>
+        Serial Number: <input type="text" name="laptop_serial_number" value="{{ laptop.laptop_serial_number }}"><br>
+        Warranty Duration (months): <input type="number" name="warranty_duration" value="{{ laptop.warranty_duration }}"><br>
+        Price: <input type="number" step="0.01" name="laptop_price" value="{{ laptop.laptop_price }}"><br>
+        <input type="submit" value="Update Laptop">
+    </form>
+    <a href="{{ url_for('list_laptops') }}">Back to Laptops</a>
+</body>
+</html>
