@@ -11,8 +11,8 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# import sys
 import os
+# import sys
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 app = Flask(__name__)
