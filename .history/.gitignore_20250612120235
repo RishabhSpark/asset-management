@@ -194,4 +194,3 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 client_secret.json
-.history

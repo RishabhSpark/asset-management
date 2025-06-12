@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Assign Laptop</title>
+  </head>
+  <body>
+    <h1>Assign Laptop to User</h1>
+    <form method="post">
+      User:
+      <select name="user_id">
+        {% for user in users %}
+        <option value="{{ user.id }}">
+          {{ user.name }} ({{ user.email }})
+        </option>
+        {% endfor %}</select
+      ><br />
+      Laptop:
+      <select name="laptop_item_id">
+        {% for laptop in laptops %}
+        <option value="{{ laptop.id }}">
+          ID: {{ laptop.id }} | Model: {{ laptop.laptop_model }} | Serial: {{
+          laptop.laptop_serial_number }}
+        </option>
+        {% endfor %}</select
+      ><br />
+      <input type="submit" value="Assign" />
+    </form>
+    <a href="{{ url_for('users') }}">Back to Users</a>
+  </body>
+</html>

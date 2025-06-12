@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laptop Details - Asset Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4">Laptop Details</h1>
+        <a
+          href="{{ url_for('list_laptops') }}"
+          class="btn btn-outline-secondary"
+        >
+          <i class="bi bi-arrow-left"></i> Back to Laptops
+        </a>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+      {% endif %} {% if laptop %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-laptop"></i> {{ laptop.laptop_model }} (SN: {{
+            laptop.laptop_serial_number }})
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Model:</dt>
+                <dd class="col-sm-7">{{ laptop.laptop_model }}</dd>
+
+                <dt class="col-sm-5">Serial Number:</dt>
+                <dd class="col-sm-7">{{ laptop.laptop_serial_number }}</dd>
+
+                <dt class="col-sm-5">Processor:</dt>
+                <dd class="col-sm-7">{{ laptop.processor }}</dd>
+
+                <dt class="col-sm-5">RAM:</dt>
+                <dd class="col-sm-7">{{ laptop.ram }}</dd>
+
+                <dt class="col-sm-5">Storage:</dt>
+                <dd class="col-sm-7">{{ laptop.storage }}</dd>
+
+                <dt class="col-sm-5">Color:</dt>
+                <dd class="col-sm-7">{{ laptop.model_color }}</dd>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Screen Size:</dt>
+                <dd class="col-sm-7">{{ laptop.screen_size }}</dd>
+
+                <dt class="col-sm-5">OS:</dt>
+                <dd class="col-sm-7">{{ laptop.laptop_os }}</dd>
+
+                <dt class="col-sm-5">OS Version:</dt>
+                <dd class="col-sm-7">{{ laptop.laptop_os_version }}</dd>
+
+                <dt class="col-sm-5">Warranty Duration:</dt>
+                <dd class="col-sm-7">{{ laptop.warranty_duration }}</dd>
+
+                <dt class="col-sm-5">Warranty Expiry:</dt>
+                <dd class="col-sm-7">{{ laptop.warranty_expiry or 'N/A' }}</dd>
+
+                <dt class="col-sm-5">Price:</dt>
+                <dd class="col-sm-7">
+                  ${{ "{:,.2f}".format(laptop.laptop_price) }}
+                </dd>
+
+                <dt class="col-sm-5">Created At:</dt>
+                <dd class="col-sm-7">{{ laptop.created_at }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div
+          class="card-footer d-flex justify-content-between align-items-center"
+        >
+          <div>
+            <span class="fw-bold me-2">Status:</span>
+            {% if laptop.is_retired %}
+            <span class="badge bg-danger fs-6"
+              ><i class="bi bi-archive"></i> Retired/Disposed</span
+            >
+            {% else %}
+            <span class="badge bg-success fs-6"
+              ><i class="bi bi-check-circle"></i> Active</span
+            >
+            {% endif %}
+          </div>
+          {% if not laptop.is_retired %}
+          <form
+            method="post"
+            action="{{ url_for('retire_laptop', laptop_id=laptop.id) }}"
+            class="d-inline"
+          >
+            <button
+              type="submit"
+              class="btn btn-warning btn-sm"
+              onclick="return confirm('Are you sure you want to retire/dispose of this laptop? This action cannot be undone.');"
+            >
+              <i class="bi bi-x-octagon"></i> Retire/Dispose
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-people"></i> Assignment History
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              {% if assignments %}
+              <ul class="list-group list-group-flush">
+                {% for assignment in assignments %}
+                <li class="list-group-item">
+                  <p class="mb-1">
+                    <i class="bi bi-person-fill"></i> Assigned to:
+                    <strong
+                      >{{ assignment.user.name if assignment.user else 'N/A'
+                      }}</strong
+                    >
+                    ({% if assignment.user %}{{ assignment.user.email }}{% else
+                    'User ID: ' + assignment.user_id|string }}{% endif %})
+                  </p>
+                  <small class="text-muted">
+                    <i class="bi bi-calendar"></i> Assigned at: {{
+                    assignment.assigned_at }} {% if assignment.unassigned_at %}
+                    <br />
+                    <i class="bi bi-calendar-x"></i> Unassigned at: {{
+                    assignment.unassigned_at }} {% endif %}
+                  </small>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="p-3 text-muted">
+                No assignments found for this laptop.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0"><i class="bi bi-tools"></i> Maintenance Logs</h5>
+            </div>
+            <div class="card-body p-0">
+              {% if laptop.maintenance_logs %}
+              <ul class="list-group list-group-flush">
+                {% for log in laptop.maintenance_logs %}
+                <li class="list-group-item">
+                  <p class="mb-1">
+                    <i class="bi bi-calendar-event"></i>
+                    <strong class="me-2">Date:</strong> {{ log.date }}
+                  </p>
+                  <p class="mb-1">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <strong class="me-2">Description:</strong> {{
+                    log.description }}
+                  </p>
+                  <p class="mb-0">
+                    <i class="bi bi-person-circle"></i>
+                    <strong class="me-2">Performed By:</strong> {{
+                    log.performed_by }}
+                  </p>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="p-3 text-muted">
+                No maintenance logs found for this laptop.
+              </div>
+              {% endif %}
+            </div>
+            <div class="card-footer text-end">
+              <a
+                href="{{ url_for('add_maintenance_log', laptop_id=laptop.id) }}"
+                class="btn btn-sm btn-outline-success"
+              >
+                <i class="bi bi-plus-circle"></i> Add Maintenance Log
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Laptop Not Found!</h4>
+        <p>
+          We couldn't find a laptop with the requested ID. Please check the URL
+          or return to the list of laptops.
+        </p>
+        <hr />
+        <a href="{{ url_for('list_laptops') }}" class="btn btn-warning"
+          ><i class="bi bi-arrow-left-circle"></i> Go to Laptops List</a
+        >
+      </div>
+      {% endif %}
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
