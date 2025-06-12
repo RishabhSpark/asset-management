@@ -1,7 +1,19 @@
 Assignment ID,Laptop ID,Laptop Model,Laptop Serial Number,User ID,User Name,User Email,Assigned At,Unassigned At
-1,1,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,1,Rishabh,rishabh1000khadnelwal@gmail.com,2025-06-09T15:50:37.990386,2025-06-09T15:51:46.239253
-6,1,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,3,Vijay,vijay@gmail.com,2025-06-09T15:52:33.406164,
-5,2,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,2,fiona,fiona123r2@werf.com,2025-06-09T15:51:54.835721,
-3,3,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,3,Vijay,vijay@gmail.com,2025-06-09T15:51:12.784744,
-4,4,"Apple MacBook Air Laptop M1 chip, 13.3-inch/33.74 cm Retina Display, 8GB RAM, 256GB SSD Storage, Backlit Keyboard, FaceTime HD Camera, Touch ID. Works with iPhone/iPad; Space Grey | B08N5W4NNB",,3,Vijay,vijay@gmail.com,2025-06-09T15:51:18.422123,
-2,5,APPLE MacBook Air Core i5 5th Gen - (8 GB/128 GB SSD/Mac OS Sierra) MQD32HN/A,SFVFDL811 J1WK,2,fiona,fiona123r2@werf.com,2025-06-09T15:51:02.061905,2025-06-09T15:51:54.835721
+5,1,Apple MacBook Air Laptop M1 chip,None,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:46:35.278451,2025-06-11T09:46:44.491165
+13,1,Apple MacBook Air Laptop M1 chip,None,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:50:32.163648,
+10,2,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:49:41.921257,
+8,2,Apple MacBook Air Laptop M1 chip,,5,papil,papil@verma.com,2025-06-11T09:49:04.504934,2025-06-11T09:49:12.365171
+1,3,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:33:38.291678,2025-06-11T09:33:49.118824
+12,3,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:50:25.583793,
+3,3,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:34:45.191932,2025-06-11T09:50:04.509991
+6,4,Apple MacBook Air Laptop M1 chip,,3,Anurag,anurag@gmail.com,2025-06-11T09:48:04.945679,2025-06-11T09:48:10.258624
+11,4,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:50:04.510081,
+9,4,Apple MacBook Air Laptop M1 chip,,5,papil,papil@verma.com,2025-06-11T09:49:12.365252,2025-06-11T09:49:29.512590
+2,4,Apple MacBook Air Laptop M1 chip,,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:33:49.118985,2025-06-11T09:46:35.278310
+4,5,APPLE MacBook Air Core i5 5th Gen,SFVFDL811,1,Fiona Lazarus,fiona@gmail.com,2025-06-11T09:45:07.801477,2025-06-11T09:46:57.540480
+7,5,APPLE MacBook Air Core i5 5th Gen,SFVFDL811,3,Anurag,anurag@gmail.com,2025-06-11T09:48:10.258696,
+17,8,papil,,2,noob,noob@gmail.com,2025-06-11T10:00:14.200052,2025-06-11T10:00:59.550939
+16,11,papil,,5,papil,papil@verma.com,2025-06-11T09:58:22.458143,
+14,13,papil,,5,papil,papil@verma.com,2025-06-11T09:57:23.779701,
+18,14,papil,,2,noob,noob@gmail.com,2025-06-11T10:00:59.551033,
+15,17,papil,,5,papil,papil@verma.com,2025-06-11T09:57:39.199840,

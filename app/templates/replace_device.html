@@ -1,20 +1,110 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Replace Device</title>
-</head>
-<body>
-    <h1>Replace Device for User ID: {{ assignment.user_id }}</h1>
-    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-    <form method="post">
-        <label for="new_laptop_id">Replace with:</label>
-        <select name="new_laptop_id" id="new_laptop_id" required>
-            {% for laptop in unassigned_laptops %}
-                <option value="{{ laptop.id }}">ID: {{ laptop.id }} | Model: {{ laptop.laptop_model }} | Serial: {{ laptop.laptop_serial_number }}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Replace">
-    </form>
-    <a href="{{ url_for('user_detail', user_id=assignment.user_id) }}">Cancel</a>
-</body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#"></a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="btn btn-outline-light ms-2"
+                href="{{ url_for('logout') }}"
+                aria-current="page"
+              >
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4 mb-0">
+          Replace Device for User ID: {{ assignment.user_id }}
+        </h1>
+        <a
+          href="{{ url_for('user_detail', user_id=assignment.user_id) }}"
+          class="btn btn-outline-secondary"
+        >
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+      </div>
+      {% endif %}
+
+      <div class="card shadow-sm p-4">
+        {% if unassigned_laptops %}
+        <form method="post">
+          <div class="mb-3">
+            <label for="new_laptop_id" class="form-label fs-5"
+              >Replace with:</label
+            >
+            <select
+              name="new_laptop_id"
+              id="new_laptop_id"
+              class="form-select form-select-lg"
+              required
+            >
+              {% for laptop in unassigned_laptops %}
+              <option value="{{ laptop.id }}">
+                ID: {{ laptop.id }} | Model: {{ laptop.laptop_model }} | Serial:
+                {{ laptop.laptop_serial_number }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg mt-3 w-100">
+            <i class="bi bi-arrow-repeat me-2"></i>Replace Device
+          </button>
+        </form>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>No unassigned laptops
+          available to replace with.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

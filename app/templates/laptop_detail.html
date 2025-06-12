@@ -1,60 +1,241 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Laptop Details</title>
-</head>
-<body>
-    <h1>Laptop Details</h1>
-    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-    {% if laptop %}
-        <p><b>Model:</b> {{ laptop.laptop_model }}</p>
-        <p><b>Serial Number:</b> {{ laptop.laptop_serial_number }}</p>
-        <p><b>Processor:</b> {{ laptop.processor }}</p>
-        <p><b>RAM:</b> {{ laptop.ram }}</p>
-        <p><b>Storage:</b> {{ laptop.storage }}</p>
-        <p><b>Color:</b> {{ laptop.model_color }}</p>
-        <p><b>Screen Size:</b> {{ laptop.screen_size }}</p>
-        <p><b>OS:</b> {{ laptop.laptop_os }}</p>
-        <p><b>OS Version:</b> {{ laptop.laptop_os_version }}</p>
-        <p><b>Warranty Duration:</b> {{ laptop.warranty_duration }}</p>
-        <p><b>Warranty Expiry:</b> {{ laptop.warranty_expiry or 'N/A' }}</p>
-        <p><b>Price:</b> {{ laptop.laptop_price }}</p>
-        <p><b>Created At:</b> {{ laptop.created_at }}</p>
-        <p><b>Status:</b> {% if laptop.is_retired %}Retired/Disposed{% else %}Active{% endif %}</p>
-        <form method="post" action="{{ url_for('retire_laptop', laptop_id=laptop.id) }}" style="display:inline;">
-            {% if not laptop.is_retired %}
-            <input type="submit" value="Retire/Dispose">
-            {% endif %}
-        </form>
-        <h2>Assignment History</h2>
-        <ul>
-            {% for assignment in assignments %}
-                <li>
-                    Assigned to User ID: {{ assignment.user_id }}
-                    {% if assignment.user %} ({{ assignment.user.name }} - {{ assignment.user.email }}){% endif %}
-                    <br>Assigned at: {{ assignment.assigned_at }}
-                    {% if assignment.unassigned_at %}<br>Unassigned at: {{ assignment.unassigned_at }}{% endif %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laptop Details - Asset Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#"></a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="btn btn-outline-light ms-2"
+                href="{{ url_for('logout') }}"
+                aria-current="page"
+              >
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4">Laptop Details</h1>
+        <a href="{{ url_for('list_laptops') }}" class="btn btn-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Back to Laptops
+        </a>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+      {% endif %} {% if laptop %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-laptop me-2"></i>{{ laptop.laptop_model }} ({{
+            laptop.laptop_serial_number }})
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <strong>Model:</strong> {{ laptop.laptop_model }}
                 </li>
-            {% else %}
-                <li>No assignments found.</li>
-            {% endfor %}
-        </ul>
-        <h2>Maintenance Logs</h2>
-        <ul>
-            {% for log in laptop.maintenance_logs %}
-                <li>
-                    <b>Date:</b> {{ log.date }}<br>
-                    <b>Description:</b> {{ log.description }}<br>
-                    <b>Performed By:</b> {{ log.performed_by }}
+                <li class="list-group-item">
+                  <strong>Serial Number:</strong> {{ laptop.laptop_serial_number
+                  }}
                 </li>
-            {% else %}
-                <li>No maintenance logs found.</li>
-            {% endfor %}
-        </ul>
-        <a href="{{ url_for('add_maintenance_log', laptop_id=laptop.id) }}">Add Maintenance Log</a>
-    {% else %}
-        <p>Laptop not found.</p>
-    {% endif %}
-    <a href="{{ url_for('list_laptops') }}">Back to Laptops</a>
-</body>
+                <li class="list-group-item">
+                  <strong>Processor:</strong> {{ laptop.processor }}
+                </li>
+                <li class="list-group-item">
+                  <strong>RAM:</strong> {{ laptop.ram }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Storage:</strong> {{ laptop.storage }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Color:</strong> {{ laptop.model_color }}
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <strong>Screen Size:</strong> {{ laptop.screen_size }}
+                </li>
+                <li class="list-group-item">
+                  <strong>OS:</strong> {{ laptop.laptop_os }}
+                </li>
+                <li class="list-group-item">
+                  <strong>OS Version:</strong> {{ laptop.laptop_os_version }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Warranty Duration:</strong> {{
+                  laptop.warranty_duration }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Warranty Expiry:</strong> {{ laptop.warranty_expiry or
+                  'N/A' }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Price:</strong> ${{ "%.2f" |
+                  format(laptop.laptop_price) }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Created At:</strong> {{ laptop.created_at }}
+                </li>
+                <li class="list-group-item">
+                  <strong>Status:</strong>
+                  {% if laptop.is_retired %}
+                  <span class="badge bg-danger"
+                    ><i class="bi bi-archive me-1"></i>Retired/Disposed</span
+                  >
+                  {% else %}
+                  <span class="badge bg-success"
+                    ><i class="bi bi-check-circle me-1"></i>Active</span
+                  >
+                  {% endif %}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-light d-flex justify-content-end">
+          {% if not laptop.is_retired %}
+          <form
+            method="post"
+            action="{{ url_for('retire_laptop', laptop_id=laptop.id) }}"
+          >
+            <button
+              type="submit"
+              class="btn btn-warning"
+              onclick="return confirm('Are you sure you want to retire/dispose of this laptop? This action cannot be undone.');"
+            >
+              <i class="bi bi-archive me-2"></i>Retire/Dispose
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-people me-2"></i>Assignment History
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              {% if assignments %}
+              <ul class="list-group list-group-flush">
+                {% for assignment in assignments %}
+                <li class="list-group-item">
+                  <strong>User:</strong>
+                  {% if assignment.user %}
+                  <a href="#" class="text-decoration-none"
+                    >{{ assignment.user.name }} ({{ assignment.user.email }})</a
+                  >
+                  {% else %} User ID: {{ assignment.user_id }} (User Not Found)
+                  {% endif %}
+                  <br />
+                  <small class="text-muted"
+                    >Assigned at: {{ assignment.assigned_at }}</small
+                  >
+                  {% if assignment.unassigned_at %}
+                  <br />
+                  <small class="text-muted"
+                    >Unassigned at: {{ assignment.unassigned_at }}</small
+                  >
+                  {% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="p-3 text-muted">
+                No assignments found for this laptop.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-tools me-2"></i>Maintenance Logs
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              {% if laptop.maintenance_logs %}
+              <ul class="list-group list-group-flush">
+                {% for log in laptop.maintenance_logs %}
+                <li class="list-group-item">
+                  <strong>Date:</strong> {{ log.date }}<br />
+                  <strong>Description:</strong> {{ log.description }}<br />
+                  <strong>Performed By:</strong> {{ log.performed_by }}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="p-3 text-muted">No maintenance logs found.</div>
+              {% endif %}
+            </div>
+            <div class="card-footer bg-light text-end">
+              <a
+                href="{{ url_for('add_maintenance_log', laptop_id=laptop.id) }}"
+                class="btn btn-outline-success btn-sm"
+              >
+                <i class="bi bi-plus-circle me-2"></i>Add Maintenance Log
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="alert alert-warning" role="alert">Laptop not found.</div>
+      {% endif %}
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
