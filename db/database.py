@@ -40,6 +40,7 @@ class LaptopItem(Base):
     warranty_expiry = Column(String, nullable=True) 
     is_retired = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    drive_file_id = Column(String, ForeignKey('drive_files.id'), nullable=True)  # Link to DriveFile if imported
 
 class User(Base):
     __tablename__ = "users"

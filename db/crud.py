@@ -3,32 +3,34 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 
-def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
+def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any], drive_file_id: Optional[str] = None) -> None:
     session = SessionLocal()
     invoice_number = invoice_dict.get("Invoice Number")
 
-    # delete if exists (cascades to items)
-    existing = session.query(LaptopInvoice).filter_by(invoice_number=invoice_number).first()
-    if existing:
-        session.delete(existing)
-        session.commit()
+    # Try to find existing invoice
+    invoice = session.query(LaptopInvoice).filter_by(invoice_number=invoice_number).first()
+    if invoice:
+        # Update invoice fields
+        invoice.order_date = invoice_dict.get("Order Date")
+        invoice.invoice_date = invoice_dict.get("Invoice Date")
+        invoice.order_number = invoice_dict.get("Order Number")
+        invoice.supplier_name = invoice_dict.get("Supplier (Vendor) Name")
+    else:
+        invoice = LaptopInvoice(
+            invoice_number=invoice_dict.get("Invoice Number"),
+            order_date=invoice_dict.get("Order Date"),
+            invoice_date=invoice_dict.get("Invoice Date"),
+            order_number=invoice_dict.get("Order Number"),
+            supplier_name=invoice_dict.get("Supplier (Vendor) Name")
+        )
+        session.add(invoice)
+        session.flush()  # get invoice.id
 
-    # insert main invoice
-    invoice = LaptopInvoice(
-        invoice_number=invoice_dict.get("Invoice Number"),
-        order_date=invoice_dict.get("Order Date"),
-        invoice_date=invoice_dict.get("Invoice Date"),
-        order_number=invoice_dict.get("Order Number"),
-        supplier_name=invoice_dict.get("Supplier (Vendor) Name")
-    )
-    session.add(invoice)
-    session.flush()  # get invoice.id
-
-    # insert all laptop items
+    # Track serial+drive_file_id pairs in this invoices
+    seen_keys = set()
     for item in invoice_dict.get("Laptops", []):
         quantity = item.get("Quantity", 1)
         serial_numbers = item.get("Laptop Serial Number")
-        # If serial_numbers is a list, use it, else make a list of Nones or repeat the value
         if isinstance(serial_numbers, list):
             serials = serial_numbers
         elif serial_numbers is not None:
@@ -37,9 +39,11 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
             serials = [None] * quantity
         for i in range(quantity):
             serial = serials[i] if i < len(serials) else None
-            # Check for duplicate serial number
+            key = (serial, drive_file_id)
+            seen_keys.add(key)
+            # Deduplication logic
             if serial:
-                existing_laptop = session.query(LaptopItem).filter_by(laptop_serial_number=serial).first()
+                existing_laptop = session.query(LaptopItem).filter_by(laptop_serial_number=serial, drive_file_id=drive_file_id).first()
                 if existing_laptop:
                     # Update existing laptop fields
                     existing_laptop.invoice_id = invoice.id
@@ -53,7 +57,9 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                     existing_laptop.laptop_os_version = item.get("Laptop OS Version")
                     existing_laptop.warranty_duration = item.get("Warranty Duration")
                     existing_laptop.laptop_price = item.get("Laptop Price")
+                    existing_laptop.drive_file_id = drive_file_id
                     continue  # Don't add a new one
+            # Only add if not found
             laptop_item = LaptopItem(
                 invoice_id=invoice.id,
                 laptop_model=item.get("Lapotop Model"),
@@ -66,9 +72,17 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                 laptop_os_version=item.get("Laptop OS Version"),
                 laptop_serial_number=serial,
                 warranty_duration=item.get("Warranty Duration"),
-                laptop_price=item.get("Laptop Price")
+                laptop_price=item.get("Laptop Price"),
+                drive_file_id=drive_file_id
             )
             session.add(laptop_item)
+    # Remove laptops for this invoice+drive_file_id that are not in the new data (by serial+drive_file_id)
+    if invoice.id:
+        all_laptops = session.query(LaptopItem).filter_by(invoice_id=invoice.id, drive_file_id=drive_file_id).all()
+        for l in all_laptops:
+            key = (l.laptop_serial_number, l.drive_file_id)
+            if key not in seen_keys:
+                session.delete(l)
     session.commit()
     session.close()
 
