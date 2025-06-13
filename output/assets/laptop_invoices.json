@@ -1,5 +1,27 @@
 [
   {
+    "Invoice Number": "FAAOZK2200001887",
+    "Order Date": "02-04-2021",
+    "Invoice Date": "04-04-2021",
+    "Order Number": "OD121420552428604000",
+    "Supplier (Vendor) Name": "Sane Retails Private Limited",
+    "Laptops": [
+      {
+        "Lapotop Model": "MacBook Air",
+        "Processor": "i5 5th Gen",
+        "RAM": "8GB",
+        "Storage": "128GB SSD",
+        "Model Color": null,
+        "Screen Size": null,
+        "Laptop OS": "Mac OS Sierra",
+        "Laptop OS Version": null,
+        "Laptop Serial Number": "SFVFDL811J1WK",
+        "Warranty Duration": 12,
+        "Laptop Price": 67640.0
+      }
+    ]
+  },
+  {
     "Invoice Number": "HYD8-1345061",
     "Order Date": "26-09-2024",
     "Invoice Date": "26-09-2024",
@@ -55,28 +77,8 @@
         "Laptop OS": null,
         "Laptop OS Version": null,
         "Laptop Serial Number": null,
-	@@ -61,14 +61,14 @@
-    ]
-  },
-  {
-    "Invoice Number": "FAAOZK2200001887",
-    "Order Date": "02-04-2021",
-    "Invoice Date": "04-04-2021",
-    "Order Number": "OD121420552428604000",
-    "Supplier (Vendor) Name": "Sane Retails Private Limited",
-    "Laptops": [
-      {
-        "Lapotop Model": "MacBook Air",
-        "Processor": "i5 5th Gen",
-        "RAM": "8GB",
-        "Storage": "128GB SSD",
-        "Model Color": null,
-        "Screen Size": null,
-        "Laptop OS": "Mac OS Sierra",
-        "Laptop OS Version": null,
-        "Laptop Serial Number": "SFVFDL811J1WK",
-        "Warranty Duration": 12,
-        "Laptop Price": 67640.0
+        "Warranty Duration": null,
+        "Laptop Price": 44906.78
       }
     ]
   }

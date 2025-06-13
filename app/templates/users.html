@@ -33,6 +33,14 @@
           <ul class="navbar-nav">
             <li class="nav-item">
               <a
+                class="btn btn-warning ms-2"
+                href="{{ url_for('drive_tree') }}"
+              >
+                <i class="bi bi-upload"></i> Upload Invoice
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
                 class="btn btn-outline-light ms-2"
                 href="{{ url_for('logout') }}"
                 aria-current="page"
