@@ -65,3 +65,50 @@ erDiagram
         datetime last_edited
     }
 ```
+
+```mermaid
+graph TD
+
+subgraph Client
+    A[HTML + Bootstrap UI]
+end
+
+subgraph Backend
+    B[App Server - Flask]
+    B1[Pandas & PDF Extractor]
+    B2[LLM Gemini API]
+end
+
+subgraph External Services
+    C[Google Drive API]
+    D[Gemini LLM API]
+end
+
+subgraph Database
+    E[(SQLite DB)]
+    E1[Laptop Invoices]
+    E2[Laptop Items]
+    E3[Users]
+    E4[Laptop Assignments]
+    E5[Maintenance Logs]
+    E6[Drive Files]
+end
+
+%% Connections
+A --> B
+B --> B1
+B --> B2
+B1 --> E
+B2 --> B1
+B --> E
+B --> C
+B2 --> D
+
+%% DB relationships
+E --> E1
+E --> E2
+E --> E3
+E --> E4
+E --> E5
+E --> E6
+```
