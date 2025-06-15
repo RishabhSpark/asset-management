@@ -1,121 +1,37 @@
-<<<<<<< HEAD
-import io
-import tempfile
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaIoBaseDownload
 from flask import Flask, render_template, request, redirect, url_for, send_file, session, jsonify, flash, g
-from db.crud import create_user, delete_invoice_by_drive_file_id, get_all_drive_files, get_all_users, get_user_by_id, insert_or_replace_laptop_invoice, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user, upsert_drive_files_sqlalchemy
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog, DriveFile, init_db
-import pandas as pd
-from functools import wraps
-from datetime import datetime
-from sqlalchemy.orm import joinedload
-=======
-import os
-import pandas as pd
-from datetime import datetime
-from dotenv import load_dotenv
-from functools import wraps
-from sqlalchemy.orm import joinedload
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-from flask import Flask, render_template, request, redirect, url_for, send_file, session,flash, g
->>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
-from werkzeug.security import generate_password_hash, check_password_hash
-from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
+import pandas as pd
+from datetime import datetime
+from sqlalchemy.orm import joinedload
+from werkzeug.security import generate_password_hash, check_password_hash
 
-<<<<<<< HEAD
-import os
-
-from extractor.export import export_all_laptop_invoices_csv, export_all_laptop_invoices_json
-from extractor.run_extraction import run_pipeline
 # import sys
+import os
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-=======
-load_dotenv()
->>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'supersecret123') 
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.secret_key = "supersecret123"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 CLIENT_SECRETS_FILE = 'client_secret.json'
-
-USERS = {}
-for i in range(1, 10): 
-    username = os.getenv(f'USER_{i}_NAME')
-    password = os.getenv(f'USER_{i}_PASSWORD')
-    if username and password:
-        USERS[username] = password  
 
 
 def build_credentials(creds_dict):
     return Credentials(**creds_dict)
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session or not session['logged_in']:
-            flash('Please log in to access this page.', 'danger')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-@app.before_request
-def load_logged_in_user():
-    g.user = None
-    if 'username' in session:
-        g.user = session['username']
-
-
 @app.route("/")
 def index():
-    return render_template("login.html")
 
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-
-    if "logged_in" in session and session['logged_in']:
-        return render_template('index.html')
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username in USERS and check_password_hash(USERS[username], password):
-            session['logged_in'] = True
-            session['username'] = username
-            flash(f'Logged in successfully as {username}!', 'success')
-
-            return render_template('index.html')
-        else:
-            flash('Invalid username or password.', 'danger')
-            return render_template('login.html')
-    return render_template('login.html')
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    session.pop('credentials', None)
-    flash('You have been logged out.', 'info')
-    session.clear()
-    return redirect(url_for('login'))
+    return render_template("index.html")
 
 
 @app.route('/authorize')
-@login_required
 def authorize():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
@@ -127,7 +43,6 @@ def authorize():
 
 
 @app.route('/oauth2callback')
-@login_required
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
@@ -142,15 +57,14 @@ def oauth2callback():
 
 
 @app.route('/users')
-@login_required
 def users():
-
+    if 'credentials' not in session:
+        return redirect('authorize')
     users = [u for u in get_all_users() if u.is_active]
     return render_template("users.html", users=users)
 
 
 @app.route("/users/add", methods=["GET", "POST"])
-@login_required
 def add_user():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -172,7 +86,6 @@ def add_user():
 
 
 @app.route("/users/<int:user_id>")
-@login_required
 def user_detail(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -182,7 +95,6 @@ def user_detail(user_id):
 
 
 @app.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
-@login_required
 def edit_user(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -206,7 +118,6 @@ def edit_user(user_id):
 
 
 @app.route("/users/<int:user_id>/delete", methods=["POST"])
-@login_required
 def delete_user_route(user_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -215,7 +126,6 @@ def delete_user_route(user_id):
 
 
 @app.route("/laptops")
-@login_required
 def list_laptops():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -235,7 +145,6 @@ def list_laptops():
 
 
 @app.route("/assign", methods=["GET", "POST"])
-@login_required
 def assign_laptop():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -274,7 +183,6 @@ def assign_laptop():
 
 
 @app.route("/unassign/<int:assignment_id>", methods=["POST"])
-@login_required
 def unassign_laptop_route(assignment_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -292,7 +200,6 @@ def unassign_laptop_route(assignment_id):
 
 
 @app.route("/laptops/add", methods=["GET", "POST"])
-@login_required
 def add_laptop():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -356,7 +263,6 @@ def add_laptop():
 
 
 @app.route("/laptops/<int:laptop_id>/edit", methods=["GET", "POST"])
-@login_required
 def edit_laptop(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -406,7 +312,6 @@ def edit_laptop(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>")
-@login_required
 def laptop_detail(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -422,7 +327,6 @@ def laptop_detail(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>/retire", methods=["POST"])
-@login_required
 def retire_laptop(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -454,7 +358,6 @@ def retire_laptop(laptop_id):
 
 
 @app.route("/laptops/<int:laptop_id>/maintenance", methods=["GET", "POST"])
-@login_required
 def add_maintenance_log(laptop_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -486,7 +389,6 @@ def add_maintenance_log(laptop_id):
 
 
 @app.route("/replace_device/<int:assignment_id>", methods=["GET", "POST"])
-@login_required
 def replace_device(assignment_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -524,7 +426,6 @@ def replace_device(assignment_id):
 
 
 @app.route("/download_invoices")
-@login_required
 def download_invoices():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -570,7 +471,6 @@ def download_invoices():
 
 
 @app.route("/download_asset_records")
-@login_required
 def download_asset_records():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -617,7 +517,6 @@ def download_asset_records():
 
 
 @app.route("/download_assignment_history")
-@login_required
 def download_assignment_history():
     if 'credentials' not in session:
         return redirect('authorize')
@@ -661,258 +560,5 @@ def creds_to_dict(creds):
     }
 
 
-def get_drive_tree(service, parent_id='root'):
-    """
-    Recursively builds a tree of files/folders from Google Drive.
-    Returns a nested dict structure.
-    """
-    query = f"'{parent_id}' in parents and trashed = false"
-    results = service.files().list(
-        q=query, fields="files(id, name, mimeType)", pageSize=1000).execute()
-    items = results.get('files', [])
-    tree = []
-    for item in items:
-        node = {
-            'id': item['id'],
-            'name': item['name'],
-            'mimeType': item['mimeType']
-        }
-        if item['mimeType'] == 'application/vnd.google-apps.folder':
-            node['children'] = get_drive_tree(service, item['id'])
-        tree.append(node)
-    return tree
-
-
-@app.route('/drive_tree_children/<folder_id>')
-@login_required
-def drive_tree_children(folder_id):
-    if 'credentials' not in session:
-        return ''
-    creds = Credentials.from_authorized_user_info(session['credentials'])
-    service = build('drive', 'v3', credentials=creds)
-    children = get_drive_tree(service, folder_id)
-
-    def render_tree(nodes, parent_path=""):
-        html = '<ul style="margin-left:20px">'
-        for node in nodes:
-            if node['mimeType'] == 'application/vnd.google-apps.folder':
-                folder_path = f"{parent_path}/{node['name']}" if parent_path else node['name']
-                html += f'<li class="folder"><span class="toggle">+</span> <span class="folder-name">📁 {node["name"]}</span> <button class="select-folder-btn" data-folder-path="{folder_path}">Select Folder</button><div class="children" style="display:none" data-folder-id="{node["id"]}" data-folder-path="{folder_path}"></div></li>'
-            else:
-                html += f'<li class="file">📄 {node["name"]}</li>'
-        html += '</ul>'
-        return html
-    parent_path = request.args.get('parent_path', '')
-    return render_tree(children, parent_path)
-
-
-@app.route('/drive_tree')
-@login_required
-def drive_tree():
-    if 'credentials' not in session:
-        return redirect(url_for('authorize'))
-
-    creds = Credentials.from_authorized_user_info(session['credentials'])
-    service = build('drive', 'v3', credentials=creds)
-    tree = get_drive_tree(service)
-
-    def render_tree(nodes, parent_path=""):
-        html = '<ul>'
-        for node in nodes:
-            if node['mimeType'] == 'application/vnd.google-apps.folder':
-                folder_path = f"{parent_path}/{node['name']}" if parent_path else node['name']
-                html += f'''
-                    <li class="folder">
-                        <span class="toggle">+</span>
-                        <span class="folder-name">📁 {node["name"]}</span>
-                        <button class="select-folder-btn" data-folder-path="{folder_path}">Select Folder</button>
-                        <div class="children" style="display:none" data-folder-id="{node["id"]}" data-folder-path="{folder_path}"></div>
-                    </li>
-                '''
-            else:
-                html += f'<li class="file">📄 {node["name"]}</li>'
-        html += '</ul>'
-        return html
-
-    tree_html = render_tree(tree)
-    return render_template("drive_tree.html", tree_html=tree_html)
-
-
-def list_all_files_in_folder(service, folder_id):
-    """
-    Recursively list all files in a Google Drive folder by folder_id.
-    Returns a list of dicts: [{id, name, modifiedTime}]
-    """
-    files = []
-    page_token = None
-    while True:
-        response = service.files().list(
-            q=f"'{folder_id}' in parents and trashed = false",
-            fields="nextPageToken, files(id, name, mimeType, modifiedTime)",
-            pageToken=page_token
-        ).execute()
-        for file in response.get('files', []):
-            if file['mimeType'] == 'application/vnd.google-apps.folder':
-                files.extend(list_all_files_in_folder(service, file['id']))
-            else:
-                files.append({
-                    'id': file['id'],
-                    'name': file['name'],
-                    'mimeType': file['mimeType'],
-                    'modifiedTime': file.get('modifiedTime', '')
-                })
-        page_token = response.get('nextPageToken', None)
-        if not page_token:
-            break
-    return files
-
-
-def render_files_table(files):
-    if not files:
-        return '<p>No files found in this folder.</p>'
-    html = '<table border="1" id="drive-files-table"><tr><th>Filename</th><th>Last Edited</th></tr>'
-    for f in files:
-        html += f'<tr><td>{f["name"]}</td><td>{f["modifiedTime"]}</td></tr>'
-    html += '</table>'
-    return html
-
-
-@app.route('/confirm_folder', methods=['POST'])
-def confirm_folder():
-    if 'credentials' not in session:
-        return '<p>Not authorized.</p>', 401
-    creds = Credentials.from_authorized_user_info(session['credentials'])
-    service = build('drive', 'v3', credentials=creds)
-    data = request.get_json()
-    folder_id = data.get('folder_id')
-    if not folder_id:
-        return '<p>No folder selected.</p>', 400
-    files = list_all_files_in_folder(service, folder_id)
-    try:
-        upsert_drive_files_sqlalchemy(files)
-    except Exception as e:
-        # Log the error e.g., app.logger.error(f"Error upserting drive files: {e}")
-        return f"<p>Error updating database: {e}</p>", 500
-    return render_files_table(files)
-
-@app.route('/extract_text_from_drive_folder')
-def extract_text_from_drive_folder():
-    if 'credentials' not in session:
-        return redirect(url_for('authorize'))
-
-    folder_id = request.args.get('folder_id')
-    if not folder_id:
-        return "Please provide a 'folder_id' query parameter.", 400
-
-    creds = Credentials.from_authorized_user_info(session['credentials'])
-    service = build('drive', 'v3', credentials=creds)
-
-    try:
-        # Check if the folder_id is valid by trying to get its metadata
-        folder_metadata = service.files().get(
-            fileId=folder_id, fields="id, name, mimeType").execute()
-        if folder_metadata.get('mimeType') != 'application/vnd.google-apps.folder':
-            return f"The provided ID '{folder_id}' is not a folder.", 400
-        print(
-            f"Accessing folder: {folder_metadata.get('name')} (ID: {folder_id})")
-    except Exception as e:
-        return f"Invalid folder_id or error accessing folder: {e}", 400
-
-    all_files_in_folder = list_all_files_in_folder(service, folder_id)
-    pdf_files_found = False
-    extracted_texts_summary = []
-
-    print(f"\nStarting PDF text extraction for folder ID: {folder_id}")
-    # 1. Get current DB state for drive files
-    db_files = {f.id: f for f in SessionLocal().query(DriveFile).all()}  # id -> DriveFile
-    # 2. For each file in Drive, decide to skip, update, or add
-    for file_item in all_files_in_folder:
-        if file_item.get('mimeType') != 'application/pdf':
-            continue
-        file_id = file_item['id']
-        file_name = file_item['name']
-        file_last_edited = file_item.get('modifiedTime')
-        from datetime import datetime
-        file_last_edited_dt = None
-        if file_last_edited:
-            try:
-                if file_last_edited.endswith('Z'):
-                    file_last_edited_dt = datetime.fromisoformat(file_last_edited[:-1] + '+00:00')
-                else:
-                    file_last_edited_dt = datetime.fromisoformat(file_last_edited)
-            except Exception:
-                pass
-        db_drive_file = db_files.get(file_id)
-        if db_drive_file:
-            if db_drive_file.last_edited == file_last_edited_dt:
-                print(f"Skipping {file_name} (unchanged)")
-                continue  # Skip unchanged
-            else:
-                print(f"Updating {file_name} (timestamp changed)")
-                # Remove old laptops for this file id before reprocessing
-                db_session = SessionLocal()
-                db_session.query(LaptopItem).filter_by(drive_file_id=file_id).delete()
-                db_session.commit()
-                db_session.close()
-        else:
-            print(f"Adding new file {file_name}")
-        # Process the file (download, extract, insert/update)
-        try:
-            fh = None
-            request_file = service.files().get_media(fileId=file_id)
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request_file)
-            done = False
-            while not done:
-                status, done = downloader.next_chunk()
-            fh.seek(0)
-            temp_pdf_path = None
-            try:
-                temp_dir = tempfile.gettempdir()
-                temp_pdf_filename = f"temp_drive_pdf_{file_id}_{os.urandom(4).hex()}.pdf"
-                temp_pdf_path = os.path.join(temp_dir, temp_pdf_filename)
-                with open(temp_pdf_path, 'wb') as f_temp:
-                    f_temp.write(fh.getvalue())
-                print(f"PDF content for {file_name} saved to temporary file: {temp_pdf_path}")
-                print(f"  Running extraction pipeline for {file_name}...")
-                po_json_data_for_db = run_pipeline(temp_pdf_path)
-                if po_json_data_for_db:
-                    insert_or_replace_laptop_invoice(po_json_data_for_db, drive_file_id=file_id)
-                    print(f"Successfully inserted/replaced Invoice data for {file_name} into database.")
-                    extracted_texts_summary.append(f"Inserted/replaced Invoices data for: {file_name}")
-                else:
-                    print(f"  Warning: No data extracted from {file_name}. Skipping database insertion for this file.")
-                    extracted_texts_summary.append(f"No data extracted from {file_name}. DB insert skipped.")
-            finally:
-                if temp_pdf_path and os.path.exists(temp_pdf_path):
-                    print(f"Deleting temporary file: {temp_pdf_path}")
-                    os.remove(temp_pdf_path)
-        except Exception as error:
-            error_message = f"Error processing file {file_name} (ID: {file_id}): {error}"
-            print(f"{error_message}\n{'-'*80}")
-            extracted_texts_summary.append(f"Error processing: {file_name} - {error}")
-        finally:
-            if fh:
-                fh.close()
-    # --- Export and Forecast steps (like main.py) ---
-    print("\n--- Exporting Data to JSON and CSV ---")
-    from extractor.export import export_all_laptop_invoices_csv, export_all_laptop_invoices_json
-    export_all_laptop_invoices_json()
-    export_all_laptop_invoices_csv()
-    print("--- Data Export Complete ---")
-
-
-    print("\nAll processes finished successfully!")
-
-    if not pdf_files_found:
-        message = f"No PDF files found in the specified folder '{folder_metadata.get('name')}' (ID: {folder_id})."
-        print(message)
-        return message
-    else:
-        response_message = f"PDF text extraction process initiated for folder '{folder_metadata.get('name')}' (ID: {folder_id}). Check your terminal for output. Summary of processed files:<br>"
-        response_message += "<br>".join(extracted_texts_summary)
-        return response_message
-
 if __name__ == "__main__":
-    init_db()
     app.run(port=8000, debug=True)
