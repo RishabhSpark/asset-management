@@ -1,3 +1,18 @@
+<<<<<<< HEAD
+import io
+import tempfile
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from googleapiclient.http import MediaIoBaseDownload
+from flask import Flask, render_template, request, redirect, url_for, send_file, session, jsonify, flash, g
+from db.crud import create_user, delete_invoice_by_drive_file_id, get_all_drive_files, get_all_users, get_user_by_id, insert_or_replace_laptop_invoice, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user, upsert_drive_files_sqlalchemy
+from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog, DriveFile, init_db
+import pandas as pd
+from functools import wraps
+from datetime import datetime
+from sqlalchemy.orm import joinedload
+=======
 import os
 import pandas as pd
 from datetime import datetime
@@ -8,11 +23,21 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from flask import Flask, render_template, request, redirect, url_for, send_file, session,flash, g
+>>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
 from werkzeug.security import generate_password_hash, check_password_hash
 from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
 
+<<<<<<< HEAD
+import os
+
+from extractor.export import export_all_laptop_invoices_csv, export_all_laptop_invoices_json
+from extractor.run_extraction import run_pipeline
+# import sys
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+=======
 load_dotenv()
+>>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'supersecret123') 
@@ -762,15 +787,13 @@ def confirm_folder():
     folder_id = data.get('folder_id')
     if not folder_id:
         return '<p>No folder selected.</p>', 400
-    # ensure_drive_files_table() # Removed call to old SQLite function
     files = list_all_files_in_folder(service, folder_id)
     try:
-        upsert_drive_files_sqlalchemy(files)  # Use the new SQLAlchemy function
+        upsert_drive_files_sqlalchemy(files)
     except Exception as e:
         # Log the error e.g., app.logger.error(f"Error upserting drive files: {e}")
         return f"<p>Error updating database: {e}</p>", 500
     return render_files_table(files)
-
 
 @app.route('/extract_text_from_drive_folder')
 def extract_text_from_drive_folder():
@@ -801,125 +824,83 @@ def extract_text_from_drive_folder():
 
     print(f"\nStarting PDF text extraction for folder ID: {folder_id}")
     # 1. Get current DB state for drive files
-    db_files = get_all_drive_files()  # {name: (last_edited, id)}
-    # 2. Build a set of current drive file names and ids from the folder
-    current_drive_file_names = set()
-    current_drive_file_ids = set()
-    for file_item in all_files_in_folder:
-        if file_item.get('mimeType') == 'application/pdf':
-            current_drive_file_names.add(file_item['name'])
-            current_drive_file_ids.add(file_item['id'])
-    # 3. Find files in DB that are no longer in Drive and delete their PO data (by filename)
-    db_file_names = set(db_files.keys())
-    for db_name, (db_last_edited, db_id) in db_files.items():
-        if db_name not in current_drive_file_names:
-            print(
-                f"File '{db_name}' (id={db_id}) deleted from Drive (by filename). Removing from database...")
-            delete_po_by_drive_file_id(db_id)
-    # 4. For each file in Drive, decide to skip, update, or add
+    db_files = {f.id: f for f in SessionLocal().query(DriveFile).all()}  # id -> DriveFile
+    # 2. For each file in Drive, decide to skip, update, or add
     for file_item in all_files_in_folder:
         if file_item.get('mimeType') != 'application/pdf':
             continue
-        file_name = file_item['name']
         file_id = file_item['id']
+        file_name = file_item['name']
         file_last_edited = file_item.get('modifiedTime')
-        # Convert modifiedTime to datetime for comparison
         from datetime import datetime
         file_last_edited_dt = None
         if file_last_edited:
             try:
                 if file_last_edited.endswith('Z'):
-                    file_last_edited_dt = datetime.fromisoformat(
-                        file_last_edited[:-1] + '+00:00')
+                    file_last_edited_dt = datetime.fromisoformat(file_last_edited[:-1] + '+00:00')
                 else:
-                    file_last_edited_dt = datetime.fromisoformat(
-                        file_last_edited)
+                    file_last_edited_dt = datetime.fromisoformat(file_last_edited)
             except Exception:
                 pass
-        db_entry = db_files.get(file_name)
-        if db_entry:
-            db_last_edited, db_id = db_entry
-            if db_last_edited == file_last_edited_dt:
+        db_drive_file = db_files.get(file_id)
+        if db_drive_file:
+            if db_drive_file.last_edited == file_last_edited_dt:
                 print(f"Skipping {file_name} (unchanged)")
                 continue  # Skip unchanged
             else:
                 print(f"Updating {file_name} (timestamp changed)")
-                # Remove old PO data for this file id before reprocessing
-                delete_po_by_drive_file_id(file_id)
+                # Remove old laptops for this file id before reprocessing
+                db_session = SessionLocal()
+                db_session.query(LaptopItem).filter_by(drive_file_id=file_id).delete()
+                db_session.commit()
+                db_session.close()
         else:
             print(f"Adding new file {file_name}")
+        # Process the file (download, extract, insert/update)
         try:
-            # Download the file
-            request_file = service.files().get_media(fileId=file_item['id'])
+            fh = None
+            request_file = service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request_file)
             done = False
             while not done:
                 status, done = downloader.next_chunk()
-
             fh.seek(0)
-
-            # --- Integration of extract_blocks and extract_tables ---
             temp_pdf_path = None
             try:
-                # Create a temporary file to save the PDF content
                 temp_dir = tempfile.gettempdir()
-                # Generate a unique filename to avoid conflicts if multiple requests happen concurrently
-                temp_pdf_filename = f"temp_drive_pdf_{file_item['id']}_{os.urandom(4).hex()}.pdf"
+                temp_pdf_filename = f"temp_drive_pdf_{file_id}_{os.urandom(4).hex()}.pdf"
                 temp_pdf_path = os.path.join(temp_dir, temp_pdf_filename)
-
                 with open(temp_pdf_path, 'wb') as f_temp:
                     f_temp.write(fh.getvalue())
-
-                print(
-                    f"  PDF content for {file_item['name']} saved to temporary file: {temp_pdf_path}")
-
-                # --- RUN EXTRACTION PIPELINE (like main.py) ---
-                print(
-                    f"  Running extraction pipeline for {file_item['name']}...")
+                print(f"PDF content for {file_name} saved to temporary file: {temp_pdf_path}")
+                print(f"  Running extraction pipeline for {file_name}...")
                 po_json_data_for_db = run_pipeline(temp_pdf_path)
                 if po_json_data_for_db:
-                    insert_or_replace_po(po_json_data_for_db)
-                    print(
-                        f"  Successfully inserted/replaced PO data for {file_item['name']} into database.")
-                    extracted_texts_summary.append(
-                        f"Inserted/replaced PO data for: {file_item['name']}")
+                    insert_or_replace_laptop_invoice(po_json_data_for_db, drive_file_id=file_id)
+                    print(f"Successfully inserted/replaced Invoice data for {file_name} into database.")
+                    extracted_texts_summary.append(f"Inserted/replaced Invoices data for: {file_name}")
                 else:
-                    print(
-                        f"  Warning: No data extracted from {file_item['name']}. Skipping database insertion for this file.")
-                    extracted_texts_summary.append(
-                        f"No data extracted from {file_item['name']}. DB insert skipped.")
-                # --- END PIPELINE ---
-
+                    print(f"  Warning: No data extracted from {file_name}. Skipping database insertion for this file.")
+                    extracted_texts_summary.append(f"No data extracted from {file_name}. DB insert skipped.")
             finally:
-                # Clean up the temporary file
                 if temp_pdf_path and os.path.exists(temp_pdf_path):
-                    print(f"  Deleting temporary file: {temp_pdf_path}")
+                    print(f"Deleting temporary file: {temp_pdf_path}")
                     os.remove(temp_pdf_path)
-
         except Exception as error:
-            error_message = f"Error processing file {file_item['name']} (ID: {file_item['id']}): {error}"
+            error_message = f"Error processing file {file_name} (ID: {file_id}): {error}"
             print(f"{error_message}\n{'-'*80}")
-            extracted_texts_summary.append(
-                f"Error processing: {file_item['name']} - {error}")
+            extracted_texts_summary.append(f"Error processing: {file_name} - {error}")
         finally:
             if fh:
                 fh.close()
-        pdf_files_found = True
-
-    print(f"Finished processing folder ID: {folder_id}\n")
-
     # --- Export and Forecast steps (like main.py) ---
     print("\n--- Exporting Data to JSON and CSV ---")
-    from extractor.export import export_all_pos_json, export_all_csvs
-    export_all_pos_json()
-    export_all_csvs()
+    from extractor.export import export_all_laptop_invoices_csv, export_all_laptop_invoices_json
+    export_all_laptop_invoices_json()
+    export_all_laptop_invoices_csv()
     print("--- Data Export Complete ---")
 
-    print("\n--- Generating Financial Forecast ---")
-    from forecast_processor import run_forecast_processing
-    run_forecast_processing(input_json_path="./output/purchase_orders.json")
-    print("--- Financial Forecast Generation Complete ---")
 
     print("\nAll processes finished successfully!")
 
@@ -932,6 +913,6 @@ def extract_text_from_drive_folder():
         response_message += "<br>".join(extracted_texts_summary)
         return response_message
 
-
 if __name__ == "__main__":
+    init_db()
     app.run(port=8000, debug=True)

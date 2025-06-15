@@ -1,34 +1,36 @@
-from db.database import SessionLocal, LaptopInvoice, LaptopItem, User, LaptopAssignment
+from db.database import DriveFile, SessionLocal, LaptopInvoice, LaptopItem, User, LaptopAssignment
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 
-def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
+def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any], drive_file_id: Optional[str] = None) -> None:
     session = SessionLocal()
     invoice_number = invoice_dict.get("Invoice Number")
 
-    # delete if exists (cascades to items)
-    existing = session.query(LaptopInvoice).filter_by(invoice_number=invoice_number).first()
-    if existing:
-        session.delete(existing)
-        session.commit()
+    # Try to find existing invoice
+    invoice = session.query(LaptopInvoice).filter_by(invoice_number=invoice_number).first()
+    if invoice:
+        # Update invoice fields
+        invoice.order_date = invoice_dict.get("Order Date")
+        invoice.invoice_date = invoice_dict.get("Invoice Date")
+        invoice.order_number = invoice_dict.get("Order Number")
+        invoice.supplier_name = invoice_dict.get("Supplier (Vendor) Name")
+    else:
+        invoice = LaptopInvoice(
+            invoice_number=invoice_dict.get("Invoice Number"),
+            order_date=invoice_dict.get("Order Date"),
+            invoice_date=invoice_dict.get("Invoice Date"),
+            order_number=invoice_dict.get("Order Number"),
+            supplier_name=invoice_dict.get("Supplier (Vendor) Name")
+        )
+        session.add(invoice)
+        session.flush()  # get invoice.id
 
-    # insert main invoice
-    invoice = LaptopInvoice(
-        invoice_number=invoice_dict.get("Invoice Number"),
-        order_date=invoice_dict.get("Order Date"),
-        invoice_date=invoice_dict.get("Invoice Date"),
-        order_number=invoice_dict.get("Order Number"),
-        supplier_name=invoice_dict.get("Supplier (Vendor) Name")
-    )
-    session.add(invoice)
-    session.flush()  # get invoice.id
-
-    # insert all laptop items
+    # Track serial+drive_file_id pairs in this invoices
+    seen_keys = set()
     for item in invoice_dict.get("Laptops", []):
         quantity = item.get("Quantity", 1)
         serial_numbers = item.get("Laptop Serial Number")
-        # If serial_numbers is a list, use it, else make a list of Nones or repeat the value
         if isinstance(serial_numbers, list):
             serials = serial_numbers
         elif serial_numbers is not None:
@@ -37,9 +39,11 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
             serials = [None] * quantity
         for i in range(quantity):
             serial = serials[i] if i < len(serials) else None
-            # Check for duplicate serial number
+            key = (serial, drive_file_id)
+            seen_keys.add(key)
+            # Deduplication logic
             if serial:
-                existing_laptop = session.query(LaptopItem).filter_by(laptop_serial_number=serial).first()
+                existing_laptop = session.query(LaptopItem).filter_by(laptop_serial_number=serial, drive_file_id=drive_file_id).first()
                 if existing_laptop:
                     # Update existing laptop fields
                     existing_laptop.invoice_id = invoice.id
@@ -53,7 +57,9 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                     existing_laptop.laptop_os_version = item.get("Laptop OS Version")
                     existing_laptop.warranty_duration = item.get("Warranty Duration")
                     existing_laptop.laptop_price = item.get("Laptop Price")
+                    existing_laptop.drive_file_id = drive_file_id
                     continue  # Don't add a new one
+            # Only add if not found
             laptop_item = LaptopItem(
                 invoice_id=invoice.id,
                 laptop_model=item.get("Lapotop Model"),
@@ -66,9 +72,17 @@ def insert_or_replace_laptop_invoice(invoice_dict: Dict[str, Any]) -> None:
                 laptop_os_version=item.get("Laptop OS Version"),
                 laptop_serial_number=serial,
                 warranty_duration=item.get("Warranty Duration"),
-                laptop_price=item.get("Laptop Price")
+                laptop_price=item.get("Laptop Price"),
+                drive_file_id=drive_file_id
             )
             session.add(laptop_item)
+    # Remove laptops for this invoice+drive_file_id that are not in the new data (by serial+drive_file_id)
+    if invoice.id:
+        all_laptops = session.query(LaptopItem).filter_by(invoice_id=invoice.id, drive_file_id=drive_file_id).all()
+        for l in all_laptops:
+            key = (l.laptop_serial_number, l.drive_file_id)
+            if key not in seen_keys:
+                session.delete(l)
     session.commit()
     session.close()
 
@@ -215,4 +229,99 @@ def soft_delete_laptop(laptop_id: int) -> bool:
     laptop.is_active = False
     session.commit()
     session.close()
-    return True
+    return 
+
+def upsert_drive_files_sqlalchemy(files_data: list[dict]):
+    """
+    Upserts (updates or inserts) DriveFile records using SQLAlchemy.
+    Deletes records from the DB that are not in the provided files_data list based on ID.
+
+    Args:
+        files_data: A list of dictionaries, where each dictionary
+                    represents a file and contains 'id', 'name',
+                    and 'modifiedTime' (as an ISO 8601 string).
+    """
+    session = SessionLocal()
+    try:
+        # Get all current DB file IDs for efficient deletion check later
+        current_db_file_ids = {db_file.id for db_file in session.query(DriveFile.id).all()}
+        
+        processed_ids = set()
+
+        for file_data in files_data:
+            file_id = file_data['id']
+            file_name = file_data['name']
+            processed_ids.add(file_id)
+
+            try:
+                modified_time_str = file_data.get('modifiedTime')
+                # Ensure Z is handled correctly for UTC, or timezone info is present
+                if modified_time_str:
+                    if modified_time_str.endswith('Z'):
+                        last_edited_dt = datetime.fromisoformat(modified_time_str[:-1] + '+00:00')
+                    else:
+                        last_edited_dt = datetime.fromisoformat(modified_time_str)
+                else:
+                    last_edited_dt = None
+            except ValueError as ve:
+                # Log this error: print(f"ValueError parsing date for file {file_id}: {ve}")
+                last_edited_dt = None # Or handle as appropriate
+
+            existing_file = session.query(DriveFile).filter_by(id=file_id).first()
+
+            if existing_file:
+                # Update if name or modifiedTime is different
+                if existing_file.name != file_name or existing_file.last_edited != last_edited_dt:
+                    existing_file.name = file_name
+                    existing_file.last_edited = last_edited_dt
+            else:
+                # Insert new file
+                new_file = DriveFile(
+                    id=file_id,
+                    name=file_name,
+                    last_edited=last_edited_dt
+                )
+                session.add(new_file)
+
+        # Delete files from DB that are not in the incoming list
+        ids_to_delete = current_db_file_ids - processed_ids
+        if ids_to_delete:
+            session.query(DriveFile).filter(DriveFile.id.in_(ids_to_delete)).delete(synchronize_session=False)
+        
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        # Consider logging the error e, e.g., logger.error(f"Error in upsert_drive_files_sqlalchemy: {e}")
+        raise
+    finally:
+        session.close()
+
+
+def get_all_drive_files():
+    """
+    Returns a dict mapping file name to (last_edited, id) for all files in the drive_files table.
+    """
+    session = SessionLocal()
+    try:
+        files = session.query(DriveFile).all()
+        # Map: name -> (last_edited, id)
+        return {f.name: (f.last_edited, f.id) for f in files}
+    finally:
+        session.close()
+
+
+def delete_invoice_by_drive_file_id(file_id):
+    """
+    Deletes all PO-related data (purchase order, milestones, payment schedule) for a given drive file id.
+    Assumes PO id is the same as drive file id or can be mapped (adjust as needed).
+    """
+    session = SessionLocal()
+    try:
+        # Find all POs linked to this drive file id (assuming id == file_id)
+        po = session.query(LaptopItem).filter_by(id=file_id).first()
+        if po:
+            # Delete related milestones and payment schedules (cascade should handle if set)
+            session.delete(po)
+            session.commit()
+    finally:
+        session.close()

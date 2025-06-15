@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 import os
@@ -40,6 +40,7 @@ class LaptopItem(Base):
     warranty_expiry = Column(String, nullable=True) 
     is_retired = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    drive_file_id = Column(String, ForeignKey('drive_files.id'), nullable=True)  # Link to DriveFile if imported
 
 class User(Base):
     __tablename__ = "users"
@@ -69,8 +70,12 @@ class MaintenanceLog(Base):
     performed_by = Column(String)
     laptop_item = relationship("LaptopItem", backref="maintenance_logs")
 
+class DriveFile(Base):
+    __tablename__ = "drive_files"
+    id = Column(String, primary_key=True)  # Google Drive File ID
+    name = Column(String, index=True) # Indexing name can be useful for lookups
+    last_edited = Column(DateTime, nullable=True) # Using DateTime for last_edited
+
 def init_db():
-    if not os.path.exists("laptop_database.db"):
+    if not os.path.exists("invoices_database.db"):
         Base.metadata.create_all(bind=engine)
-    # Always check and create new tables if needed
-    Base.metadata.create_all(bind=engine)
