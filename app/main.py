@@ -1,6 +1,7 @@
-<<<<<<< HEAD
 import io
+import os
 import tempfile
+from dotenv import load_dotenv
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
@@ -12,32 +13,14 @@ import pandas as pd
 from functools import wraps
 from datetime import datetime
 from sqlalchemy.orm import joinedload
-=======
-import os
-import pandas as pd
-from datetime import datetime
-from dotenv import load_dotenv
-from functools import wraps
-from sqlalchemy.orm import joinedload
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-from flask import Flask, render_template, request, redirect, url_for, send_file, session,flash, g
->>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
 from werkzeug.security import generate_password_hash, check_password_hash
 from db.database import SessionLocal, LaptopItem, LaptopAssignment, User, LaptopInvoice, MaintenanceLog
 from db.crud import create_user, get_all_users, get_user_by_id, update_user, soft_delete_user, soft_delete_laptop, get_assignments_for_user
-
-<<<<<<< HEAD
-import os
-
-from extractor.export import export_all_laptop_invoices_csv, export_all_laptop_invoices_json
 from extractor.run_extraction import run_pipeline
 # import sys
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-=======
+
 load_dotenv()
->>>>>>> c2e3d4c3b5d54124503e2051067fba9f11b5cded
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'supersecret123') 
