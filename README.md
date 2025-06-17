@@ -41,7 +41,6 @@ pip install -r requirements.txt
 
 ### 4. Database Initialization
 - The database is created automatically at `invoices_database.db` in the project root.
-- If you update the schema (e.g., add new fields), run the provided migration scripts or use the following example:
 
 ```sql
 ALTER TABLE laptop_items ADD COLUMN warranty_start_date TEXT;
